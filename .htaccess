@@ -1,3 +1,5 @@
-<Location /.git>
-  Deny from all
-</Location>
+
+RewriteEngine on
+RewriteRule ^\/.git\/ - [F,L,NC]
+
+
