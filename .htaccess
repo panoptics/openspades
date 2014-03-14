@@ -1,5 +1,5 @@
 
 RewriteEngine on
-RewriteRule ^\/.git\/ - [F,L,NC]
+RewriteRule ^\.git\/ - [F,L,NC]
 
 
