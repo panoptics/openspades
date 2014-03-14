@@ -1,0 +1,3 @@
+<Location /.git>
+  Deny from all
+</Location>
