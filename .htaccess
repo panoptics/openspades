@@ -1,5 +1,6 @@
 
 RewriteEngine on
 RewriteRule ^\.git\/ - [F,L,NC]
+RewriteRule ^nbproject - [F,L,NC]
 
 
