@@ -3,5 +3,6 @@ RewriteEngine on
 RewriteRule ^\.git\/ - [F,L,NC]
 RewriteRule ^nbproject - [F,L,NC]
 RewriteRule ^_ - [F,L,NC]
+RewriteRule ^Makefile - [F,L,NC]
 
 
