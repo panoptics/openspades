@@ -42,8 +42,8 @@ function finalize_page() {
             <div id="global-nav">
                 <ul>
                     <li><a href="/">Top</a></li>
-                    <li><a href="/">Media</a></li>
-                    <li><a href="/">Community</a></li>
+                    <li><a href="/media.php">Media</a></li>
+                    <li><a href="http://buildandshoot.com/viewforum.php?f=57">Community</a></li>
                     <li><a href="https://github.com/yvt/openspades">Developer Zone</a></li>
                     <li class="download"><a href="/download.php">Download Now</a></li>
                 </ul>
