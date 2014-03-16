@@ -44,8 +44,8 @@ function finalize_page() {
                     <li><a href="/">Top</a></li>
                     <li><a href="/">Media</a></li>
                     <li><a href="/">Community</a></li>
-                    <li><a href="/">Development</a></li>
-                    <li class="download"><a href="/download.php">Download Now!</a></li>
+                    <li><a href="https://github.com/yvt/openspades">Developer Zone</a></li>
+                    <li class="download"><a href="/download.php">Download Now</a></li>
                 </ul>
             </div>
         </nav>
