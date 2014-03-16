@@ -1,0 +1,90 @@
+
+@contentWidth: 960px;
+
+#header-wrapper {
+    #header {
+        width: @contentWidth;
+        height: 72px;
+        position: relative;
+        margin: 0 auto;
+        background: url(../img/header-logo.svg) no-repeat;
+    }
+}
+
+@globalNavHeight: 36px;
+
+#global-nav-wrapper {
+    background: #13141a;
+    box-shadow: 0px 1px 8px rgba(0, 0, 0, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+    #global-nav {
+        width: @contentWidth;
+        position: relative;
+        margin: 0 auto;
+        height: @globalNavHeight;
+    }
+}
+
+
+#global-nav ul {
+    margin: 0; padding: 0;
+    li {
+        list-style-type: none;
+        a {
+            float: left;
+            line-height: @globalNavHeight;
+            display: block;
+            font-family: SquareFont;
+            font-size: 16px;
+            color: #afafb2;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6);
+            text-decoration: none;
+            padding: 0px 40px;
+
+            &:hover {
+                color: #13141a;
+                background: #afafb2;
+                text-shadow:  0px 1px 2px rgba(255, 255, 255, 0.4);
+            }
+        }
+    }
+    li.download {
+        a {
+            float: right;
+            font-size: 15px;
+            line-height: @globalNavHeight - 8px;
+            margin: 3px;
+            background: #573e28;
+            border: 1px solid #66492f;
+            color: #e7dfd9;
+            text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.6);
+            &:hover {
+                background: #69492e;
+                color: #e9e2e2;
+                border-color: #694b32;
+                box-shadow: 0px 0px 1px #573e28;
+            }
+        }
+    }
+}
+
+main {
+    background: #151515;
+}
+
+.content-wrapper {
+    width: @contentWidth - 20px;
+    position: relative;
+    margin: 0 auto;
+    padding: 10px 0;
+}
+
+h1 {
+    font-family: SquareFont;
+    font-size: 36px;
+    color: #a0a0a0;
+    font-weight: 300;
+    border-bottom: 1px solid #404040;
+    margin: 0.3em 0;
+}
