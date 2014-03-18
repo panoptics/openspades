@@ -1,0 +1,121 @@
+
+@contentWidth: 960px;
+
+@globalNavHeight: 36px;
+
+header {
+    background: lighten(#13141a, 5%);
+    box-shadow: 0px 1px 8px rgba(0, 0, 0, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.2), inset 0px 0px 1px rgba(255, 255, 255, 0.05);
+    z-index: 2;
+    height: 20px;
+}
+
+#jumbotron {
+    width: @contentWidth;
+    margin: 0 auto;
+    position: relative;
+    
+    @h: @contentWidth / 1920 * 1080;
+    height: @h;
+    
+    #jumbotronBg {
+        width: @contentWidth;
+        height: @h;
+    }
+    
+    div.text {
+        position: absolute;
+        right: 0; top: 170px;
+        width: 45%;
+        font-family: SquareFont;
+        font-size: 50px;
+        line-height: 1.2;
+        color: rgba(255, 255, 255, 0.6);
+        text-shadow: 0px 0px 10px rgba(0, 0, 0, 1);
+    }
+    
+    h1 {
+        margin: 0;
+    }
+    
+    h1 img {
+        position: absolute;
+        right: -100px;
+        top: 20px;
+        min-width: 60%;
+    }
+    
+    a {
+        position: absolute;
+        right: 70px;
+        bottom: 100px;
+        font-family: SquareFont;
+        font-size: 35px;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 1);
+        text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+        background: fade(#a76628, 90%);
+        border: 1px solid lighten(#a76628, 7%);
+        box-shadow: 0px 0px 14px fade(#a76628, 40%), 4px 4px 0 rgba(0, 0, 0, 0.6);
+        padding: 0px 40px;
+        
+        &:hover {
+            background: lighten(#a76628, 4%);
+            border: 1px solid lighten(lighten(#a76628, 4%), 7%);
+            
+            box-shadow: 0px 0px 14px fade(#a76628, 60%), 4px 4px 0 rgba(0, 0, 0, 0.6);
+        }
+    }
+}
+
+#global-nav-wrapper {
+    background: #13141a;
+    border-top: 4px solid lighten(#13141a, 2%);
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.3), 0px 0px 3px rgba(0, 0, 0, 0.2), inset 0px 0px 1px rgba(255, 255, 255, 0.05);
+    z-index: 2;
+    height: @globalNavHeight;
+    position: relative;
+    #global-nav {
+        width: @contentWidth;
+        position: relative;
+        margin: 0 auto;
+        height: @globalNavHeight;
+    }
+}
+
+#main-wrapper {
+    background: #151515;
+    #main {
+        width: @contentWidth;
+        position: relative;
+        margin: 0 auto;
+        
+    }
+}
+
+#main {
+    
+
+    h2 {
+        font-family: SquareFont;
+        font-size: 24px;
+        color: #a0a0a0;
+        font-weight: 300;
+        margin: 0.3em 0;
+    }
+
+
+    div.col {
+        width: @contentWidth / 2 - 10px;
+        overflow: hidden;
+        float: left;
+        padding: 5px;
+
+        
+        &:last-of-type {
+            width: auto;
+            float: none;
+        }
+    }
+}
+
