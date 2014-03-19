@@ -34,6 +34,7 @@ function finalize_page() {
         <link rel="stylesheet" type="text/css" href="css/pages.css">
     </head>
     <body>
+        <?php include_once("../analyticstracking.php") ?>
         <header id="header-wrapper">
             <div id="header">
             </div>

@@ -7,6 +7,7 @@
         <link rel="stylesheet" type="text/css" href="css/main.css">
     </head>
     <body>
+        <?php include_once("analyticstracking.php") ?>
         <header></header>
         <div id="jumbotron">
             <img src="img/mainvis.jpg" id="jumbotronBg" alt="">

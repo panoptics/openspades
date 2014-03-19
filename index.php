@@ -29,6 +29,7 @@
         </style>
     </head>
     <body>
+        <?php include_once("analyticstracking.php") ?>
     	<img src="img/dummy.jpg" id="dummy" alt="">
         <div id="text"><div style="margin-bottom: 10px;">Under Construction</div>
             <a href="https://github.com/yvt/openspades">≫ GitHub</a><br>
