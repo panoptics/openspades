@@ -30,15 +30,15 @@
 namespace spades {
 	VoxelModel::VoxelModel(int w, int h, int d) {
 		SPADES_MARK_FUNCTION();
-		
+
 		if(w < 1 || h < 1 || d < 1 || w > 4096 || h > 4096)
 			SPRaise("Invalid dimension: %dx%dx%d", w, h, d);
 		
 		width = w;
 		height = h;
 		depth = d;
-		if(d > 64){
-			SPRaise("Voxel model with depth > 64 is not supported.");
+		if(d > 256 ){
+			SPRaise("Voxel model with depth > 256 is not supported.");
 		}
 		
 		solidBits = new uint64_t[w * h];

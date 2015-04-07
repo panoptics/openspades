@@ -211,7 +211,7 @@ namespace spades {
 			}
 			
 			for(int z = blk.z - 1 ; z <= blk.z + 1; z++){
-				if(z < 0 || z > 61)
+				if(z < 0 || z > map->Depth() -3)
 					continue;
 				if(!map->IsSolid(blk.x, blk.y, z))
 					continue;
@@ -272,8 +272,8 @@ namespace spades {
 			for(int x = blk.x - 1; x <= blk.x + 1; x++)
 				for(int y = blk.y - 1; y <= blk.y + 1; y++)
 					for(int z = blk.z - 1 ; z <= blk.z + 1; z++){
-						if(z < 0 || z > 61 || x < 0 || x >= 512 ||
-						   y < 0 || y >= 512)
+						if(z < 0 || z > map->Depth()-3 || x < 0 || x >= map->Width() ||
+						   y < 0 || y >= map->Height() )
 							continue;
 						if(!map->IsSolid(x, y, z))
 							continue;

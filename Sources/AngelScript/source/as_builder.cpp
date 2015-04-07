@@ -1788,7 +1788,7 @@ void asCBuilder::CompileGlobalVariables()
 						if(gvar2->datatype == gvar->datatype )
 						{
 							// The integer value is stored in the lower bytes
-							enumVal = (*(int*)&gvar2->constantValue) + 1;
+							enumVal = (reinterpret_cast<sGlobalVariableDescription*>(&gvar2))->constantValue + 1;
 
 							if( !gvar2->isCompiled )
 							{
@@ -1809,7 +1809,8 @@ void asCBuilder::CompileGlobalVariables()
 					}
 
 					// The integer value is stored in the lower bytes
-					*(int*)&gvar->constantValue = enumVal;
+					//*(int*)&gvar->constantValue = enumVal;
+					reinterpret_cast<sGlobalVariableDescription*>(&gvar)->constantValue = enumVal;
 				}
 
 				if( r >= 0 )
@@ -1902,7 +1903,7 @@ void asCBuilder::CompileGlobalVariables()
 					}
 
 					e->name = gvar->name;
-					e->value = *(int*)&gvar->constantValue;
+					e->value = reinterpret_cast<sGlobalVariableDescription*>(&gvar)->constantValue;
 
 					objectType->enumValues.PushLast(e);
 				}

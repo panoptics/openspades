@@ -31,18 +31,18 @@ namespace spades {
 		public:
 			View(){}
 			
-			virtual void MouseEvent(float x, float y) {}
+			virtual void MouseEvent(float, float) {}
 			virtual void KeyEvent(const std::string&,
-								  bool down) {}
+								  bool) {}
 			virtual void TextInputEvent(const std::string&) {}
 			virtual void TextEditingEvent(const std::string&,
-										  int start, int len) {}
+										  int, int) {}
 			virtual bool AcceptsTextInput() { return false; }
 			virtual AABB2 GetTextInputRect() { return AABB2(); }
 			virtual bool NeedsAbsoluteMouseCoordinate() { return false; }
-			virtual void WheelEvent(float x, float y) {}
+			virtual void WheelEvent(float, float) {}
 			
-			virtual void RunFrame(float dt) {}
+			virtual void RunFrame(float) {}
 			
 			virtual void Closing() {}
 			

@@ -849,12 +849,17 @@ namespace spades {
 			}
 			
 			if(net) {
+				if(GetWorld()){
+				Player *p = GetWorld()->GetLocalPlayer();
+				if (p){
 				auto ping = net->GetPing();
 				auto upbps = net->GetUplinkBps();
 				auto downbps = net->GetDownlinkBps();
-				sprintf(buf, ", ping: %dms, up/down: %.02f/%.02fkbps",
-						ping, upbps / 1000.0, downbps / 1000.0);
+				sprintf(buf, ", ping: %dms,  up:%.02f down:%.02f kbps x:%.02f y:%.02f z:%.02f",
+						ping, upbps / 1000.0, downbps / 1000.0, p->GetEye().x, p->GetEye().y, p->GetEye().z );
 				str += buf;
+				}
+				}
 			}
 			
 			float scrWidth = renderer->ScreenWidth();

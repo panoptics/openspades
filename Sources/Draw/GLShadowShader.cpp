@@ -60,7 +60,8 @@ namespace spades {
 		pagetableSize("pagetableSize"),
 		pagetableSizeInv("pagetableSizeInv"),
 		minLod("minLod"),
-		shadowMapSizeInv("shadowMapSizeInv")
+		shadowMapSizeInv("shadowMapSizeInv"),
+		mapDimensions("mapDimensions")
 		{}
 		
 		std::vector<GLShader *> GLShadowShader::RegisterShader(spades::draw::GLProgramManager *r, bool variance) {
@@ -120,12 +121,14 @@ namespace spades {
 			fogColor(program);
 			eyeOrigin(program);
 			eyeFront(program);
-			
+			mapDimensions(program);
+
 			const client::SceneDefinition& def = renderer->GetSceneDef();
 			
 			eyeOrigin.SetValue(def.viewOrigin.x,
 							   def.viewOrigin.y,
 							   def.viewOrigin.z);
+
 			eyeFront.SetValue(def.viewAxis[2].x,
 							   def.viewAxis[2].y,
 							   def.viewAxis[2].z);
@@ -147,6 +150,11 @@ namespace spades {
 				
 			}
 			mapShadowTexture.SetValue(texStage);
+			mapDimensions.SetValue( 
+				  float(renderer->w)
+				, float(renderer->h)
+				, float(renderer->d) 
+			);
 			texStage++;
 			
 			if(r_modelShadows){

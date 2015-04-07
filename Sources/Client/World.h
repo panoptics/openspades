@@ -62,6 +62,8 @@ namespace spades {
 			GameMapWrapper *mapWrapper;
 			float time;
 			IntVector3 fogColor;
+			float cullDistance;
+
 			Team teams[3];
 		
 			std::vector<Player *> players;
@@ -87,7 +89,8 @@ namespace spades {
 			
 			IntVector3 GetFogColor() { return fogColor; }
 			void SetFogColor(IntVector3 v) { fogColor = v; }
-			
+			void SetCullDistance(float d) { cullDistance = d; }
+			float GetCullDistance(void) { return cullDistance; }
 			void Advance(float dt);
 			
 			void AddGrenade(Grenade *);

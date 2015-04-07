@@ -53,7 +53,8 @@ namespace spades {
 		
 		
 #pragma mark - Drawing
-		
+		float z_far = 258.0f;
+
 		bool Client::ShouldRenderInThirdPersonView() {
 			if(world && world->GetLocalPlayer()){
 				if(!world->GetLocalPlayer()->IsAlive())
@@ -102,9 +103,11 @@ namespace spades {
 			SceneDefinition def;
 			def.time = (unsigned int)(time * 1000.f);
 			def.denyCameraBlur = true;
-			
+
 			if(world){
 				IntVector3 fogColor = world->GetFogColor();
+				z_far = world->GetCullDistance();
+				renderer->SetFogDistance( z_far-8.0 );
 				renderer->SetFogColor(MakeVector3(fogColor.x / 255.f,
 												  fogColor.y / 255.f,
 												  fogColor.z / 255.f));
@@ -364,7 +367,7 @@ namespace spades {
 					}
 					
 					def.zNear = 0.05f;
-					def.zFar = 130.f;
+					def.zFar = z_far;
 					
 					def.skipWorld = false;
 				}else{
@@ -379,7 +382,7 @@ namespace spades {
 									 renderer->ScreenHeight()) * 2.f;
 					
 					def.zNear = 0.05f;
-					def.zFar = 130.f;
+					def.zFar = z_far;
 					
 					def.skipWorld = false;
 				}
@@ -396,7 +399,7 @@ namespace spades {
 								 renderer->ScreenHeight()) * 2.f;
 				
 				def.zNear = 0.05f;
-				def.zFar = 130.f;
+				def.zFar = z_far;
 				
 				def.skipWorld = true;
 				
@@ -418,7 +421,7 @@ namespace spades {
 			IModel *model;
 			model = renderer->RegisterModel("Models/Weapons/Grenade/Grenade.kv6");
 			
-			if(g->GetPosition().z > 63.f) {
+			if(g->GetPosition().z > map->Depth()-1 ) {
 				// work-around for water refraction problem
 				return;
 			}

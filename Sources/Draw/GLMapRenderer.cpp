@@ -136,13 +136,12 @@ namespace spades {
 		
 		void GLMapRenderer::RealizeChunks(spades::Vector3 eye) {
 			SPADES_MARK_FUNCTION();
-			
-			float cullDistance = 128.f;
+
 			float releaseDistance = 160.f;
 			for(int i = 0; i < numChunks; i++){
 				float dist = chunks[i]->DistanceFromEye(eye);
 				chunkInfos[i].distance = dist;
-				if(dist < cullDistance)
+				if(dist < gameMap->GetCullDistance() )
 					chunks[i]->SetRealized(true);
 				else if(dist > releaseDistance)
 					chunks[i]->SetRealized(false);
@@ -182,33 +181,38 @@ namespace spades {
 			basicProgram->Use();
 			
 			static GLShadowShader shadowShader;
-			shadowShader(renderer, basicProgram, 2);
-			
 			static GLProgramUniform fogDistance("fogDistance");
+			static GLProgramUniform viewSpaceLight("viewSpaceLight");
+			static GLProgramUniform fogColor("fogColor");
+			static GLProgramUniform waterDepth("waterDepth");
+			static GLProgramUniform aoUniform("ambientOcclusionTexture");
+			static GLProgramUniform detailTextureUnif("detailTexture");
+
+			shadowShader(renderer, basicProgram, 2);
 			fogDistance(basicProgram);
+			viewSpaceLight(basicProgram);
+			fogColor(basicProgram);
+			waterDepth(basicProgram);
+			aoUniform(basicProgram);
+			detailTextureUnif(basicProgram);
+
 			fogDistance.SetValue(renderer->GetFogDistance());
 			
-			static GLProgramUniform viewSpaceLight("viewSpaceLight");
-			viewSpaceLight(basicProgram);
 			Vector3 vspLight = (renderer->GetViewMatrix() * MakeVector4(0, -1, -1, 0)).GetXYZ();
 			viewSpaceLight.SetValue(vspLight.x, vspLight.y, vspLight.z);
 			
-			static GLProgramUniform fogColor("fogColor");
-			fogColor(basicProgram);
 			Vector3 fogCol = renderer->GetFogColorForSolidPass();
 			fogCol *= fogCol; // linearize
+
 			fogColor.SetValue(fogCol.x, fogCol.y, fogCol.z);
+			waterDepth.SetValue( float( gameMap->WaterDepth()+0.3 ) );
 			
-			static GLProgramUniform aoUniform("ambientOcclusionTexture");
-			aoUniform(basicProgram);
 			aoUniform.SetValue(0);
 			
-			static GLProgramUniform detailTextureUnif("detailTexture");
-			detailTextureUnif(basicProgram);
 			detailTextureUnif.SetValue(1);
 			
 			device->BindBuffer(IGLDevice::ArrayBuffer, 0);
-			
+
 			static GLProgramAttribute positionAttribute("positionAttribute");
 			static GLProgramAttribute ambientOcclusionCoordAttribute("ambientOcclusionCoordAttribute");
 			static GLProgramAttribute colorAttribute("colorAttribute");
@@ -220,7 +224,7 @@ namespace spades {
 			colorAttribute(basicProgram);
 			normalAttribute(basicProgram);
 			fixedPositionAttribute(basicProgram);
-			
+
 			device->EnableVertexAttribArray(positionAttribute(), true);
 			if(ambientOcclusionCoordAttribute() != -1)
 				device->EnableVertexAttribArray(ambientOcclusionCoordAttribute(), true);
@@ -244,7 +248,7 @@ namespace spades {
 			int cy = (int)floorf(eye.y) / GLMapChunk::Size;
 			int cz = (int)floorf(eye.z) / GLMapChunk::Size;
 			DrawColumnSunlight(cx, cy, cz, eye);
-			for(int dist = 1; dist <= 128 / GLMapChunk::Size; dist++) {
+			for(int dist = 1; dist <= gameMap->GetCullDistance() / GLMapChunk::Size; dist++) {
 				for(int x = cx - dist; x <= cx + dist; x++){
 					DrawColumnSunlight(x, cy + dist, cz, eye);
 					DrawColumnSunlight(x, cy - dist, cz, eye);
@@ -331,7 +335,7 @@ namespace spades {
 			// TODO: optimize call
 			//       ex. don't call a chunk'r render method if
 			//           no dlight lights it
-			for(int dist = 1; dist <= 128 / GLMapChunk::Size; dist++) {
+			for(int dist = 1; dist <= gameMap->GetCullDistance() / GLMapChunk::Size; dist++) {
 				for(int x = cx - dist; x <= cx + dist; x++){
 					DrawColumnDLight(x, cy + dist, cz, eye, lights);
 					DrawColumnDLight(x, cy - dist, cz, eye, lights);

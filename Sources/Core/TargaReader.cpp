@@ -161,7 +161,7 @@ namespace spades {
 				for(row=rows-1; row>=0; row--)
 				{
 					pixbuf = targa_rgba + row*columns*4;
-					for(column=0; column<columns; column++)
+					for(column=0; column< (int)(columns); column++)
 					{
 						unsigned char red,green,blue,alphabyte;
 						switch (targa_header.pixel_size)
@@ -208,7 +208,7 @@ namespace spades {
 				
 				for(row=rows-1; row>=0; row--) {
 					pixbuf = targa_rgba + row*columns*4;
-					for(column=0; column<columns; ) {
+					for(column=0; column< int(columns); ) {
 						if(buf_p + 1 > end)
 							SPRaise ( "LoadTGA: file truncated");
 						packetHeader= *buf_p++;
@@ -240,7 +240,7 @@ namespace spades {
 								*pixbuf++=blue;
 								*pixbuf++=alphabyte;
 								column++;
-								if (column==columns) { // run spans across rows
+								if (column==int(columns)) { // run spans across rows
 									column=0;
 									if (row>0)
 										row--;
@@ -280,7 +280,7 @@ namespace spades {
 										break;
 								}
 								column++;
-								if (column==columns) { // pixel packet run spans across rows
+								if (column== int(columns) ) { // pixel packet run spans across rows
 									column=0;
 									if (row>0)
 										row--;

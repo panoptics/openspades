@@ -162,7 +162,7 @@ ReportError(err, __LINE__, __PRETTY_FUNCTION__); \
 				SPLog("Shading Language Version: %s", ret);
 			}
 			SPLog("--- Extensions ---");
-			if(&glGetStringi) {
+			if( glGetStringi) {
 				GLint cnt = 0;
 				glGetIntegerv(GL_NUM_EXTENSIONS, &cnt);
 				if(cnt <= 0) goto retrvFail;
@@ -298,7 +298,8 @@ ReportError(err, __LINE__, __PRETTY_FUNCTION__); \
 			}
 			CheckError();
 		}
-		
+
+
 		void SDLGLDevice::Enable(spades::draw::IGLDevice::Enum state, bool b){
 			SPADES_MARK_FUNCTION();
 			GLenum type;

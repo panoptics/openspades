@@ -635,7 +635,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			if(!GetWorld())
 				SPRaise("Invalid Player ID %d: No world", pId);
-			if(pId < 0 || pId >= GetWorld()->GetNumPlayerSlots())
+			if(pId < 0 || pId >= int(GetWorld()->GetNumPlayerSlots()))
 				return NULL;
 			return GetWorld()->GetPlayer(pId);
 		}
@@ -643,7 +643,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			if(!GetWorld())
 				SPRaise("Invalid Player ID %d: No world", pId);
-			if(pId < 0 || pId >= GetWorld()->GetNumPlayerSlots())
+			if(pId < 0 || pId >= int(GetWorld()->GetNumPlayerSlots()))
 				SPRaise("Invalid Player ID %d: Out of range", pId);
 			if(!GetWorld()->GetPlayer(pId))
 				SPRaise("Invalid Player ID %d: Doesn't exist", pId);
@@ -1495,6 +1495,7 @@ namespace spades {
 				}
 				case PacketTypeChangeWeapon:
 				{
+					return;/*
 					reader.ReadByte();
 					WeaponType wType;
 					int weapon = reader.ReadByte();
@@ -1514,6 +1515,7 @@ namespace spades {
 					// maybe this command is intended to change local player's
 					// weapon...
 					//p->SetWeaponType(wType);
+					*/
 				}
 					break;
 				case PacketTypeHandShakeInit:
@@ -1812,8 +1814,10 @@ namespace spades {
 			
 			// now initialize world
 			World *w = new World();
+			map->SetCullDistance( w->GetCullDistance() );
 			w->SetMap(map);
 			map->Release();
+			
 			SPLog("World initialized.");
 			
 			client->SetWorld(w);

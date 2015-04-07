@@ -200,7 +200,7 @@ namespace spades {
 			// compute frustrum's z boundary
 			Segment seg;
 			Plane3 plane1(0,0,1,-4.f);
-			Plane3 plane2(0,0,1,64.f);
+			Plane3 plane2(0,0,1, GetRenderer()->d );
 			seg += ZRange(side * minX + up * minY,
 						  lightDir, plane1, plane2);
 			seg += ZRange(side * minX + up * maxY,

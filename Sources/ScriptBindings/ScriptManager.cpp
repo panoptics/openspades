@@ -35,14 +35,14 @@ namespace spades {
 		return m;
 	}
 	
-	static void MessageCallback(const asSMessageInfo *msg, void *param){
+	static void MessageCallback(const asSMessageInfo *msg, void *param  ){
 		SPADES_MARK_FUNCTION();
 		const char *type = "ERR ";
 		if( msg->type == asMSGTYPE_WARNING )
 			type = "WARN";
 		else if( msg->type == asMSGTYPE_INFORMATION )
 			type = "INFO";
-		SPLog("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);
+		SPLog("%s (%d, %d) : %s : %s %x\n", msg->section, msg->row, msg->col, type, msg->message, param );
 	}
 	
 	class ScriptBuilder: public CScriptBuilder {

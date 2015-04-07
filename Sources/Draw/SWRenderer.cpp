@@ -37,7 +37,7 @@
 #include "SWUtils.h"
 
 SPADES_SETTING(r_swStatistics, "0");
-SPADES_SETTING(r_swNumThreads, "4");
+SPADES_SETTING(r_swNumThreads, "1");
 
 namespace spades {
 	namespace draw {
@@ -426,7 +426,7 @@ namespace spades {
 							
 							for(int bx = 0; bx < 4; bx++) {
 								
-								float dist = *db3 * depthScale;
+								float dist = 0;//*db3 * depthScale;
 								int factor = std::min(static_cast<int>(dist),
 													  256);
 								factor = std::max(0, factor);
@@ -751,7 +751,7 @@ namespace spades {
 			spr.color = drawColorAlphaPremultiplied;
 		}
 		
-		void SWRenderer::AddLongSprite(client::IImage *, spades::Vector3 p1, spades::Vector3 p2, float radius) {
+		void SWRenderer::AddLongSprite(client::IImage *, spades::Vector3, spades::Vector3, float) {
 			SPADES_MARK_FUNCTION();
 			EnsureInitialized();
 			EnsureSceneStarted();
@@ -803,14 +803,14 @@ namespace spades {
 				ApplyDynamicLight<SWFeatureLevel::None>(light);
 			}
 			lights.clear();
-			
+	/*		
 #if ENABLE_SSE2
 			if(static_cast<int>(featureLevel) >= static_cast<int>(SWFeatureLevel::SSE2))
 				ApplyFog<SWFeatureLevel::SSE2>();
 			else
 #endif
 			ApplyFog<SWFeatureLevel::None>();
-			
+			*/
 			// render sprites
 			{
 				imageRenderer->SetShaderType(SWImageRenderer::ShaderType::Sprite);
@@ -982,9 +982,8 @@ namespace spades {
 			duringSceneRendering = false;
 		}
 		
-		void SWRenderer::MultiplyScreenColor(spades::Vector3 v) {
-			EnsureSceneNotStarted();
-			
+		void SWRenderer::MultiplyScreenColor(spades::Vector3) {
+			EnsureSceneNotStarted();	
 		}
 		
 		void SWRenderer::SetColor(spades::Vector4 col) {
@@ -1236,7 +1235,7 @@ namespace spades {
 			return true;
 		}
 		
-		void SWRenderer::GameMapChanged(int x, int y, int z, client::GameMap *map) {
+		void SWRenderer::GameMapChanged(int x, int y, int, client::GameMap *map) {
 			if(map != this->map) {
 				return;
 			}

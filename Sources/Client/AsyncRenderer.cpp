@@ -81,6 +81,8 @@ namespace spades {
 					r->SetFogColor(v);
 				}
 			};
+
+
 			class StartScene: public Command {
 			public:
 				SceneDefinition def;

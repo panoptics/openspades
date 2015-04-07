@@ -43,7 +43,7 @@ namespace spades {
 			
 			std::vector<IWaveTank *> waveTanks;
 			
-			int w, h;
+			int w, h, d;
 			
 			size_t updateBitmapPitch;
 			std::vector<uint32_t> updateBitmap;
@@ -77,7 +77,7 @@ namespace spades {
 			void Render();
 			
 			void Update(float dt);
-			
+
 			void GameMapChanged(int x, int y, int z, client::GameMap *);
 			
 			IGLDevice::UInteger GetOcclusionQuery() {

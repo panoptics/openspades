@@ -232,7 +232,7 @@ namespace spades{
 		uint32_t GLMapShadowRenderer::GeneratePixel(int x, int y) {
 			for(int z = 0; z < d; z++){
 				// z-plane hit
-				if(map->IsSolid(x, y, z) && z < 63){
+				if(map->IsSolid(x, y, z) && z < map->Depth()-1){
 					return BuildPixel(z, map->GetColor(x, y, z), false);
 					//return (uint8_t)z;
 				}
@@ -242,12 +242,12 @@ namespace spades{
 					y = 0;
 				
 				// y-plane hit
-				if(map->IsSolid(x, y, z) && z < 63){
+				if(map->IsSolid(x, y, z) && z < map->Depth()-1){
 					return BuildPixel(z + 1, map->GetColor(x, y, z), true);
 					//return (uint8_t)z + 1;
 				}
 			}
-			return BuildPixel(64, map->GetColor(x, y==h?0:y, 63), false);
+			return BuildPixel(map->Depth(), map->GetColor(x, y==h?0:y, map->Depth()-1), false);
 		}
 		
 		void GLMapShadowRenderer::MarkUpdate(int x, int y) {
@@ -260,7 +260,7 @@ namespace spades{
 		void GLMapShadowRenderer::GameMapChanged(int x,
 												 int y,
 												 int z,
-												 client::GameMap *m){
+												 client::GameMap *){
 			MarkUpdate(x, y - z);
 			MarkUpdate(x, y - z - 1);
 			

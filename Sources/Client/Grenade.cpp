@@ -72,27 +72,41 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			
 			float f = fsynctics * 32.f;
+			GameMap *m = world->GetMap();
+
 			Vector3 oldPos = position;
+			if ( position.z >= float( m->WaterDepth() )){
+				f = fsynctics * 4.f;
+			}
 			velocity.z += fsynctics;
+
 			position += velocity * f;
 			
 			IntVector3 lp = position.Floor();
 			IntVector3 lp2 = oldPos.Floor();
-			GameMap *m = world->GetMap();
 			
-			if(lp.z >= 63 && lp2.z < 63) {
-				if(world->GetListener())
-					world->GetListener()->GrenadeDroppedIntoWater(this);
+			if(position.z >= float( m->WaterDepth() ) && oldPos.z <= float( m->WaterDepth() ) ) {
+				if(world->GetListener()){
+						world->GetListener()->GrenadeDroppedIntoWater(this);
+
+				}
 			}
-			
-			int ret = 0;
+			// Thrown from under water, or bounced
+			if(position.z< float( m->WaterDepth() ) && oldPos.z >= float( m->WaterDepth() ) ) {
+				if(world->GetListener()){
+						world->GetListener()->GrenadeDroppedIntoWater(this);
+
+				}
+			}
+
+			int bounced = 0;
 			if(m->ClipWorld(position.x, position.y, position.z)){
 				// hit a wall
-				ret = 1;
+				bounced = 1;
 				if(fabsf(velocity.x) > BOUNCE_SOUND_THRESHOLD ||
 				   fabsf(velocity.y) > BOUNCE_SOUND_THRESHOLD ||
 				   fabsf(velocity.z) > BOUNCE_SOUND_THRESHOLD)
-					ret = 2;
+					bounced = 2;
 				
 				if (lp.z != lp2.z && ((lp.x == lp2.x && lp.y == lp2.y) ||
 									  !m->ClipWorld(lp.x, lp.y, lp2.z)))
@@ -106,7 +120,7 @@ namespace spades {
 				position = oldPos;
 				velocity *= .36f;
 			}
-			return ret;
+			return bounced;
 		}
 	}
 }

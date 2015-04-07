@@ -424,7 +424,7 @@ namespace spades {
 				(int y, int x1, int x2,
 				 const SWImageVarying& vary1,
 				 const SWImageVarying& vary2,
-				 float z1, float z2) {
+				 float z1, float) {
 					uint32_t *out = bmp + (y * fbW);
 					float *depthOut = nullptr;
 					if(depthTest) {
@@ -809,7 +809,7 @@ namespace spades {
 				(int y, int x1, int x2,
 				 const SWImageVarying& vary1,
 				 const SWImageVarying& vary2,
-				 float z1, float z2) {
+				 float z1, float) {
 					uint32_t *out = bmp + (y * fbW);
 					float *depthOut = nullptr;
 					if(depthTest) {
@@ -1008,7 +1008,7 @@ namespace spades {
 		<SWFeatureLevel::SSE2, false, false, depthTest, true, lerp> {
 			
 			
-			static void DrawPolygonInternalInner(SWImage *img,
+			static void DrawPolygonInternalInner(SWImage *,
 												 const Vertex& v1,
 												 const Vertex& v2,
 												 const Vertex& v3,
@@ -1146,9 +1146,9 @@ namespace spades {
 				
 				auto drawScanline = [bmp, fbW, fbH, depthBuffer, &drawPixel, &drawPixel2, &r]
 				(int y, int x1, int x2,
-				 const SWImageVarying& vary1,
-				 const SWImageVarying& vary2,
-				 float z1, float z2) {
+				 const SWImageVarying&,
+				 const SWImageVarying&,
+				 float z1, float) {
 					uint32_t *out = bmp + (y * fbW);
 					float *depthOut = nullptr;
 					if(depthTest) {

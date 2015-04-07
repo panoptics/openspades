@@ -278,7 +278,7 @@ namespace spades {
 			}
 			static bool ciCharLess( char c1, char c2 )
 			{
-				return (std::tolower( static_cast<char>( c1 ) ) < std::tolower( static_cast<char>( c1 ) ));
+				return (std::tolower( static_cast<char>( c1 ) ) < std::tolower( static_cast<char>( c2 ) ));
 			}
 		};
 

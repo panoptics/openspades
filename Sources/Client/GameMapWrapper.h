@@ -55,7 +55,7 @@ namespace spades {
 		struct CellPosHash {
 			inline std::size_t operator () (const CellPos& pos) const {
 				std::size_t ret;
-				if(sizeof(std::size_t) > 4) {
+				if(sizeof(std::size_t) > 8) {
 					ret = pos.x; ret <<= 16;
 					ret |= pos.y; ret <<= 16;
 					ret |= pos.z;

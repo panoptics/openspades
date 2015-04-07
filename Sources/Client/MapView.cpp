@@ -50,7 +50,7 @@ namespace spades {
 		}
 		
 		void MapView::Update(float dt){
-			float scale;
+			float scale =0.0f;
 			switch(scaleMode){
 				case 0: // 400%
 					scale = 1.f / 4.f;
@@ -350,10 +350,11 @@ namespace spades {
 			this->outRect = outRect;
 			
 			// draw grid
-			
+			float gridSize = map->Width()/8.0f;
+
 			renderer->SetColorAlphaPremultiplied(MakeVector4(0,0,0,0.8f*alpha));
 			Handle<IImage> dashLine = renderer->RegisterImage("Gfx/DashLine.tga");
-			for(float x = 64.f; x < map->Width(); x += 64.f){
+			for(float x = gridSize; x < map->Width(); x += gridSize){
 				float wx = (x - inRect.GetMinX()) / inRect.GetWidth();
 				if(wx < 0.f || wx >= 1.f)
 					continue;
@@ -363,7 +364,7 @@ namespace spades {
 									MakeVector2(wx, outRect.GetMinY()),
 									AABB2(0, 0, 1.f, outRect.GetHeight()));
 			}
-			for(float y = 64.f; y < map->Height(); y += 64.f){
+			for(float y = gridSize; y < map->Height(); y += gridSize){
 				float wy = (y - inRect.GetMinY()) / inRect.GetHeight();
 				if(wy < 0.f || wy >= 1.f)
 					continue;
@@ -377,9 +378,9 @@ namespace spades {
 			// draw grid label
 			renderer->SetColorAlphaPremultiplied(MakeVector4(1,1,1,1)*(0.8f*alpha));
 			Handle<IImage> mapFont = renderer->RegisterImage("Gfx/Fonts/MapFont.tga");
-			for(int i = 0; i < 8; i++){
-				float startX = (float)i * 64.f;
-				float endX = startX + 64.f;
+			for(int i = 0; i < map->Width()/8; i++){
+				float startX = (float)i * gridSize;
+				float endX = startX + gridSize;
 				if(startX > inRect.GetMaxX() ||
 				   endX < inRect.GetMinX())
 					continue;
@@ -394,16 +395,16 @@ namespace spades {
 				float wx = (center - inRect.GetMinX()) / inRect.GetWidth();
 				wx = (wx * outRect.GetWidth()) + outRect.GetMinX();
 				wx = roundf(wx);
-				
+				// TODO : change map gfx to support more characters
 				float fntX = static_cast<float>((i & 3) * 8);
 				float fntY = static_cast<float>((i >> 2) * 8);
 				renderer->DrawImage(mapFont,
 									MakeVector2(wx - 4.f, outRect.GetMinY() + 4),
 									AABB2(fntX, fntY, 8, 8));
 			}
-			for(int i = 0; i < 8; i++){
-				float startY = (float)i * 64.f;
-				float endY = startY + 64.f;
+			for(int i = 0; i < map->Height()/(gridSize/8); i++){
+				float startY = (float)i * gridSize;
+				float endY = startY + gridSize;
 				if(startY > inRect.GetMaxY() ||
 				   endY < inRect.GetMinY())
 					continue;
@@ -464,7 +465,7 @@ namespace spades {
 				}
 				
 				// draw player's icon
-				for(int i = 0; i < world->GetNumPlayerSlots(); i++){
+				for(size_t i = 0; i < world->GetNumPlayerSlots(); i++){
 					Player * p = world->GetPlayer(i);
 					if(p == nullptr ||
 					   p->GetTeamId() != world->GetLocalPlayer()->GetTeamId() ||
@@ -539,7 +540,7 @@ namespace spades {
 						DrawIcon(team.flagPos, intelIcon, 0.f);
 					}else if(world->GetLocalPlayer()->GetTeamId() == 1-tId){
 						// local player's team is carrying
-						int cId = ctf->GetTeam(1-tId).carrier;
+						size_t cId = ctf->GetTeam(1-tId).carrier;
 						
 						// in some game modes, carrier becomes invalid
 						if(cId < world->GetNumPlayerSlots()){

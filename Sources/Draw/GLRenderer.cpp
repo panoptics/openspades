@@ -111,7 +111,7 @@ namespace spades {
 		cameraBlur(NULL),
 		lensDustFilter(NULL),
 		lastColorBufferTexture(0),
-		fogDistance(128.f),
+		fogDistance(256.f),
 		renderingMirror(false),
 		duringSceneRendering(false),
 		lastTime(0){
@@ -735,9 +735,9 @@ namespace spades {
 					
 					// save normal matrices
 					Matrix4 view;
-					view = viewMatrix * Matrix4::Translate(0, 0, 63);
+					view = viewMatrix * Matrix4::Translate(0, 0, (this->map->WaterDepth()) );
 					view = view * Matrix4::Scale(1, 1, -1);
-					view = view * Matrix4::Translate(0, 0, -63);
+					view = view * Matrix4::Translate(0, 0, -(this->map->WaterDepth()) );
 					
 					std::swap(view, viewMatrix);
 					projectionViewMatrix = projectionMatrix * viewMatrix;
@@ -800,13 +800,16 @@ namespace spades {
 			}
 				
 			device->Enable(IGLDevice::CullFace, false);
+			device->Enable(IGLDevice::Blend, true);
 			if(r_water && waterRenderer){
 				GLProfiler profiler(device, "Water");
+				device->BlendFunc(IGLDevice::One,
+						IGLDevice::OneMinusSrcAlpha);
 				waterRenderer->Update(dt);
 				waterRenderer->Render();
 			}
+
 			
-			device->Enable(IGLDevice::Blend, true);
 			
 			device->DepthMask(false);
 			if(!r_softParticles){ // softparticle is a part of postprocess
@@ -1230,6 +1233,10 @@ namespace spades {
 		}
 		
 		void GLRenderer::GameMapChanged(int x, int y, int z, client::GameMap *map){
+			w = map->Width();
+			h = map->Height();
+			d = map->Depth();
+			
 			if(mapRenderer)
 				mapRenderer->GameMapChanged(x, y, z, map);
 			if(flatMapRenderer)
@@ -1247,8 +1254,8 @@ namespace spades {
 				// reflect
 				AABB3 bx = box;
 				std::swap(bx.min.z, bx.max.z);
-				bx.min.z = 63.f * 2.f - bx.min.z;
-				bx.max.z = 63.f * 2.f - bx.max.z;
+				bx.min.z = this->map->Depth()-1 * 2.f - bx.min.z;
+				bx.max.z = this->map->Depth()-1 * 2.f - bx.max.z;
 				return PlaneCullTest(frustrum[0], bx) &&
 						PlaneCullTest(frustrum[1], bx) &&
 						PlaneCullTest(frustrum[2], bx) &&
@@ -1268,7 +1275,7 @@ namespace spades {
 			if(IsRenderingMirror()) {
 				// reflect
 				Vector3 vx = center;
-				vx.z = 63.f * 2.f - vx.z;
+				vx.z = this->map->Depth()-1 * 2.f - vx.z;
 				for(int i = 0; i < 6; i++){
 					if(frustrum[i].GetDistanceTo(vx) < -radius)
 						return false;

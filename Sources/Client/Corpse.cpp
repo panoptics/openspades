@@ -631,7 +631,7 @@ namespace spades {
 				SPAssert(!isnan(node.pos.y));
 				SPAssert(!isnan(node.pos.z));
 				
-				if(node.pos.z > 63.f){
+				if(node.pos.z > map->WaterDepth()+0.3 ){
 					node.vel.z -= dt * 6.f; // buoyancy
 					node.vel *= damp;
 				}else{

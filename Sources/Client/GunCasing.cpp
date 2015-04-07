@@ -94,7 +94,7 @@ namespace spades {
 				IntVector3 lp = matrix.GetOrigin().Floor();
 				GameMap *m = client->GetWorld()->GetMap();
 				
-				if(lp.z >= 63){
+				if(lp.z >= m->WaterDepth() ){
 					// dropped into water
 					float dist = (client->GetLastSceneDef().viewOrigin - matrix.GetOrigin()).GetPoweredLength();
 					
@@ -118,7 +118,8 @@ namespace spades {
 						
 						Vector4 col = {1, 1, 1, 0.8f};
 						Vector3 pt = matrix.GetOrigin();
-						pt.z = 62.99f;
+						pt.z = float( m->WaterDepth() )+.3f;
+
 						for(int i = 0; i < splats; i++){
 							ParticleSpriteEntity *ent =
 							new ParticleSpriteEntity(client, img, col);

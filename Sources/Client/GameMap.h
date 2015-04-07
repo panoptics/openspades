@@ -40,9 +40,10 @@ namespace spades{
 		public:
 			// fixed for now
 			enum {
-				DefaultWidth = 512,
-				DefaultHeight = 512,
+				DefaultWidth = 1024,
+				DefaultHeight = 1024,
 				DefaultDepth = 64 // should be <= 64
+
 			};
 			GameMap();
 			
@@ -50,26 +51,35 @@ namespace spades{
 			
 			void Save(IStream *);
 			
-			int Width() { return DefaultWidth; }
-			int Height() { return DefaultHeight; }
-			int Depth() { return DefaultDepth; }
+			inline int Width() { return DefaultWidth; }
+			inline int Height() { return DefaultHeight; }
+			inline int Depth() { return DefaultDepth; }
+			inline int GroundDepth() { return DefaultDepth-2; }
+			inline int WaterDepth() { return DefaultDepth-7;  }//DefaultDepth-1;
+			inline float GetCullDistance(void) { return cullDistance; }
+			inline void SetCullDistance(float d) { cullDistance =d; }
+
+			inline uint64_t QuantizeZ(uint64_t z) {
+				return z/64;
+			}
+
 			inline bool IsSolid(int x, int y, int z) {
 				SPAssert(x >= 0); SPAssert(x < Width());
 				SPAssert(y >= 0); SPAssert(y < Height());
 				SPAssert(z >= 0); SPAssert(z < Depth());
-				return ((solidMap[x][y] >> (uint64_t)z) & 1ULL) != 0;
+				return (solidMap[QuantizeZ(z)][x][y] >> ( (uint64_t)z - QuantizeZ(z)*64 ) & 1ULL) != 0;
 			}
 			
 			/** @return 0xHHBBGGRR where HH is health (up to 100) */
 			inline uint32_t GetColor(int x, int y, int z){
-				SPAssert(x >= 0); SPAssert(x < Width());
-				SPAssert(y >= 0); SPAssert(y < Height());
-				SPAssert(z >= 0); SPAssert(z < Depth());
+				SPAssert(x >= 0); SPAssert(x < Width() );
+				SPAssert(y >= 0); SPAssert(y < Height() );
+				SPAssert(z >= 0); SPAssert(z < Depth()+1 );
 				return colorMap[x][y][z];
 			}
 			
 			inline uint64_t GetSolidMapWrapped(int x, int y) {
-				return solidMap[x & (Width() - 1)][y & (Height() - 1)];
+				return solidMap[0][x & (Width() - 1)][y & (Height() - 1)];
 			}
 			
 			inline bool IsSolidWrapped(int x, int y, int z){
@@ -77,7 +87,7 @@ namespace spades{
 					return false;
 				if(z >= Depth())
 					return true;
-				return ((solidMap[x & (Width() - 1)][y & (Height() - 1)] >> (uint64_t)z) & 1ULL) != 0;
+				return (solidMap[QuantizeZ(z)][x & (Width() - 1)][y & (Height() - 1)] >> ( (uint64_t)z - QuantizeZ(z)*64 ) & 1ULL) != 0;
 			}
 			
 			inline uint32_t GetColorWrapped(int x, int y, int z){
@@ -91,14 +101,14 @@ namespace spades{
 				SPAssert(y >= 0); SPAssert(y < Height());
 				SPAssert(z >= 0); SPAssert(z < Depth());
 				uint64_t mask = 1ULL << z;
-				uint64_t value = solidMap[x][y];
+				uint64_t value = solidMap[ QuantizeZ(z) ][x][y];
 				bool changed = false;
 				if((value & mask) != (solid ? mask : 0ULL)){
 					changed = true;
 					value &= ~mask;
 					if(solid)
 						value |= mask;
-					solidMap[x][y] = value;
+					solidMap[QuantizeZ(z)][x][y] = value;
 				}
 				if(solid){
 					if(color != colorMap[x][y][z]){
@@ -150,11 +160,14 @@ namespace spades{
 			RayCastResult CastRay2(Vector3 v0, Vector3 dir,
 								   int maxSteps);
 		private:
-			uint64_t solidMap[DefaultWidth][DefaultHeight];
+			// TODO :: Dynamic alloc based on map size held on server
+			
+			uint64_t solidMap[ int(DefaultDepth / 64) ][DefaultWidth][DefaultHeight];
 			uint32_t colorMap[DefaultWidth][DefaultHeight][DefaultDepth];
 			IGameMapListener *listener;
 			std::list<IGameMapListener *> listeners;
 			Mutex listenersMutex;
+			float cullDistance;
 			
 			bool IsSurface(int x, int y, int z);
 		};

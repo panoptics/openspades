@@ -44,8 +44,9 @@ namespace spades {
 			GLImage *image;
 			
 			int chunkCols, chunkRows;
+			float cullDistance;
 			
-			Bitmap *GenerateBitmap(int x, int y, int w, int h);
+			Bitmap *GenerateBitmap(int x, int y, int w, int h, int d);
 		public:
 			GLFlatMapRenderer(GLRenderer *renderer,
 							  client::GameMap *map);

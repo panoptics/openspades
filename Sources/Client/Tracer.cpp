@@ -21,7 +21,7 @@ namespace spades {
 			length = (p2 - p1).GetLength();
 			
 			const float maxTimeSpread = 1.f / 60.f;
-			const float shutterTime = .3f / 60.f;
+			const float shutterTime = 3.3f / 60.f;
 			
 			visibleLength = shutterTime * bulletVel;
 			curDistance = -visibleLength;
@@ -55,9 +55,9 @@ namespace spades {
 			Vector3 pos1 = startPos + dir * startDist;
 			Vector3 pos2 = startPos + dir * endDist;
 			IRenderer *r = client->GetRenderer();
-			Vector4 col = {1.f, .6f, .2f, 0.f};
+			Vector4 col = {1.f, 1.0f, 1.0f, 0.f};
 			r->SetColorAlphaPremultiplied(col * 1.3f);
-			r->AddLongSprite(image, pos1, pos2, .05f);
+			r->AddLongSprite(image, pos1, pos2, .025f);
 		}
 		
 		Tracer::~Tracer() {

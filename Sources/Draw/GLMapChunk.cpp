@@ -193,18 +193,18 @@ namespace spades {
 		
 		bool GLMapChunk::IsSolid(int x, int y, int z) {
 			if(z < 0) return false;
-			if(z >= 64) return true;
+			if(z >= map->Depth() ) return true;
 			
-			// FIXME: variable map size
-			x &= 511;
-			y &= 511;
+			// FIXED :: FIXME: variable map size
+			x &= map->Width()-1;
+			y &= map->Height()-1;
 			
-			if(z == 63){
-				if(r_water){
-					return map->IsSolid(x, y, 62);
-				}else{
-					return map->IsSolid(x, y, 63);
-				}
+			if(z == map->Depth()-1 ){
+				//if(r_water){
+				//	return map->IsSolid(x, y, map->Depth()-2);
+				//}else{
+					return map->IsSolid(x, y, map->Depth()-1);
+				//}
 			}else{
 				return map->IsSolid(x, y, z);
 			}
@@ -212,7 +212,6 @@ namespace spades {
 		
 		void GLMapChunk::Update() {
 			SPADES_MARK_FUNCTION();
-			
 			vertices.clear();
 			indices.clear();
 			if(buffer){
@@ -228,6 +227,7 @@ namespace spades {
 			int rchunkY = chunkY * Size;
 			int rchunkZ = chunkZ * Size;
 			
+			//SPLog("GLMapChunk::Update(): md%d x:%d y:%d z:%d ", map->Depth(), rchunkX, rchunkY, rchunkZ );
 			int x, y, z;
 			for(x = 0; x < Size; x++){
 				for(y = 0; y < Size; y++){
@@ -241,6 +241,7 @@ namespace spades {
 						
 						uint32_t col = map->GetColor(xx, yy, zz);
 						//col = 0xffffffff;
+
 						
 						// damaged block?
 						int health = col >> 24;
@@ -331,10 +332,10 @@ namespace spades {
 			Vector3 diff = eye - centerPos;
 			float sx = 0.f, sy = 0.f;
 			// FIXME: variable map size?
-			if(diff.x > 256.f) sx += 512.f;
-			if(diff.y > 256.f) sy += 512.f;
-			if(diff.x < -256.f) sx -= 512.f;
-			if(diff.y < -256.f) sy -= 512.f;
+			if(diff.x >   map->Width()/2.0f)   sx += map->Width();
+			if(diff.y >   map->Height()/2.0f)  sy += map->Height();
+			if(diff.x < -(map->Width()/2.0f))  sx -= map->Width();
+			if(diff.y < -(map->Height()/2.0f)) sy -= map->Height();
 			
 			bx.min.x += sx; bx.min.y += sy;
 			bx.max.x += sx; bx.max.y += sy;
@@ -414,10 +415,10 @@ namespace spades {
 			Vector3 diff = eye - centerPos;
 			float sx = 0.f, sy = 0.f;
 			// FIXME: variable map size?
-			if(diff.x > 256.f) sx += 512.f;
-			if(diff.y > 256.f) sy += 512.f;
-			if(diff.x < -256.f) sx -= 512.f;
-			if(diff.y < -256.f) sy -= 512.f;
+			if(diff.x >   map->Width()/2.0f)   sx += map->Width();
+			if(diff.y >   map->Height()/2.0f)  sy += map->Height();
+			if(diff.x < -(map->Width()/2.0f))  sx -= map->Width();
+			if(diff.y < -(map->Height()/2.0f)) sy -= map->Height();
 			
 			bx.min.x += sx; bx.min.y += sy;
 			bx.max.x += sx; bx.max.y += sy;
@@ -432,7 +433,7 @@ namespace spades {
 			chunkPosition(program);
 			chunkPosition.SetValue((float)(chunkX * Size) + sx,
 								   (float)(chunkY * Size) + sy,
-								   (float)(chunkZ * Size));
+								   (float)(chunkZ * Size) );
 			
 			static GLProgramAttribute positionAttribute("positionAttribute");
 			static GLProgramAttribute colorAttribute("colorAttribute");
@@ -479,12 +480,13 @@ namespace spades {
 			Vector3 diff = eye - centerPos;
 			
 			// FIXME: variable map size
-			if(diff.x < -256.f) diff.x += 512.f;
-			if(diff.y < -256.f) diff.y += 512.f;
-			
-			if(diff.x > 256.f) diff.x -= 512.f;
-			if(diff.y > 256.f) diff.y -= 512.f;
-			
+
+
+			if(diff.x < -(map->Width()/2.0f)) diff.x += map->Width();
+			if(diff.y < -(map->Height()/2.0f))diff.y += map->Height();
+			if(diff.x > map->Width()/2.0f) diff.x -= map->Width();
+			if(diff.y > map->Height()/2.0f) diff.y -= map->Height();
+
 			float dist = fabsf(diff.x);
 			dist = std::max(dist, fabsf(diff.y));
 			dist = std::max(dist, fabsf(diff.z));

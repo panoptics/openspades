@@ -260,8 +260,14 @@ namespace spades {
 			}
 			
 			GameMap::RayCastResult minResult;
+			minResult.hit = false;
+			minResult.startSolid =false;
+			minResult.hitPos=Vector3(0.f,0.f,0.f);
+			minResult.hitBlock=IntVector3(0,0,0);
+			minResult.normal=IntVector3(0,0,0);
+
 			float minDist = 1.e+10f;
-			Vector3 minShift;
+			Vector3 minShift=Vector3(0.f,0.f,0.f);
 			
 			// check collision
 			if(followVel.GetLength() < .01){
@@ -562,8 +568,10 @@ namespace spades {
 				Handle<IAudioChunk> c;
 				if(hurt)
 					c = audioDevice->RegisterSound("Sounds/Player/FallHurt.wav");
-				else if(p->GetWade())
+				else if(p->GetWade()){
 					c = audioDevice->RegisterSound("Sounds/Player/WaterLand.wav");
+					BulletHitWaterSurface(p->GetPosition() );
+				}
 				else
 					c = audioDevice->RegisterSound("Sounds/Player/Land.wav");
 				audioDevice->Play(c, p->GetOrigin(),
@@ -839,16 +847,16 @@ namespace spades {
 						dir *= 6.f;
 					}else{
 						if(killer->GetWeapon()->GetWeaponType() == SMG_WEAPON){
-							dir *= 2.8f;
+							dir *= 12.8f;
 						}else if(killer->GetWeapon()->GetWeaponType() == SHOTGUN_WEAPON){
-							dir *= 4.5f;
+							dir *= 44.5f;
 						}else{
-							dir *= 3.5f;
+							dir *= 13.5f;
 						}
 					}
 					corp->AddImpulse(dir);
 				}else if(kt == KillTypeGrenade){
-					corp->AddImpulse(MakeVector3(0, 0, -4.f - GetRandom() * 4.f));
+					corp->AddImpulse(MakeVector3(0, 0, -4.f - GetRandom() * 14.f));
 				}
 				corp->AddImpulse(victim->GetVelocty() * 32.f);
 				corpses.emplace_back(corp);
@@ -987,11 +995,12 @@ namespace spades {
 			IntVector3 colV = {(uint8_t)col,
 				(uint8_t)(col >> 8), (uint8_t)(col >> 16)};
 			Vector3 shiftedHitPos = hitPos;
+			//TODO : Collide with water plane
 			shiftedHitPos.x += normal.x * .05f;
 			shiftedHitPos.y += normal.y * .05f;
 			shiftedHitPos.z += normal.z * .05f;
 			
-			if(blockPos.z == 63) {
+			if(blockPos.z >= world->GetMap()->WaterDepth() ) {
 				BulletHitWaterSurface(shiftedHitPos);
 				if(!IsMuted()){
 					AudioParam param;
@@ -1068,16 +1077,17 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			
 			Tracer *t;
-			float vel;
+			float vel=0.0f;
 			switch(player->GetWeapon()->GetWeaponType()) {
 				case RIFLE_WEAPON:
-					vel = 700.f;
+					vel = 1700.f;
 					break;
 				case SMG_WEAPON:
 					vel = 360.f;
 					break;
 				case SHOTGUN_WEAPON:
-					return;
+					vel = 260.f;
+					break;
 			}
 			t = new Tracer(this, muzzlePos, hitPos, vel);
 			AddLocalEntity(t);
@@ -1108,7 +1118,7 @@ namespace spades {
 		void Client::GrenadeBounced(spades::client::Grenade *g){
 			SPADES_MARK_FUNCTION();
 			
-			if(g->GetPosition().z < 63.f){
+			if(g->GetPosition().z < float(world->GetMap()->WaterDepth() ) ){
 				if(!IsMuted()){
 					Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Weapons/Grenade/Bounce.wav");
 					audioDevice->Play(c, g->GetPosition(),
@@ -1121,6 +1131,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			
 			if(!IsMuted()){
+				BulletHitWaterSurface(g->GetPosition());
 				Handle<IAudioChunk> c = audioDevice->RegisterSound("Sounds/Weapons/Grenade/DropWater.wav");
 				audioDevice->Play(c, g->GetPosition(),
 								  AudioParam());
@@ -1130,7 +1141,7 @@ namespace spades {
 		void Client::GrenadeExploded(spades::client::Grenade *g) {
 			SPADES_MARK_FUNCTION();
 			
-			bool inWater = g->GetPosition().z > 63.f;
+			bool inWater = g->GetPosition().z >= float(world->GetMap()->WaterDepth() );
 			
 			if(inWater){
 				if(!IsMuted()){
@@ -1226,6 +1237,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			net->SendBlockAction(v, type);
 		}
+		
 		void Client::LocalPlayerCreatedLineBlock(spades::IntVector3 v1, spades::IntVector3 v2) {
 			SPADES_MARK_FUNCTION();
 			net->SendBlockLine(v1, v2);

@@ -156,7 +156,7 @@ namespace spades {
 		void PaletteView::Draw() {
 			Handle<IImage> img = renderer->RegisterImage("Gfx/Palette.png");
 			
-			int sel = GetSelectedIndex();
+			size_t sel = GetSelectedIndex();
 			
 			float scrW = renderer->ScreenWidth();
 			float scrH = renderer->ScreenHeight();
@@ -169,7 +169,7 @@ namespace spades {
 					int row = i / 8;
 					int col = i % 8;
 					
-					bool selected = sel == i;
+					bool selected = (sel == i);
 					
 					// draw color
 					IntVector3 icol = colors[i];

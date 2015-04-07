@@ -115,8 +115,8 @@ namespace spades {
 			designFont.Set(CreateSquareDesignFont(renderer), false);
 			textFont.Set(CreateGuiFont(renderer), false);
 			bigTextFont.Set(CreateLargeFont(renderer), false);
+			renderer->SetFogDistance(33.0f);
 			
-			renderer->SetFogDistance(128.f);
 			renderer->SetFogColor(MakeVector3(.8f, 1.f, 1.f));
 			
 			chatWindow.reset(new ChatWindow(this, GetRenderer(), textFont, false));
@@ -187,13 +187,14 @@ namespace spades {
 				map = world->GetMap();
 				renderer->SetGameMap(map);
 				audioDevice->SetGameMap(map);
+				renderer->SetFogDistance( world->GetCullDistance() );
 				NetLog("------ World Loaded ------");
 			}else{
 				
 				SPLog("World removed");
 				NetLog("------ World Unloaded ------");
 			}
-			
+
 			limbo->SetSelectedTeam(2);
 			limbo->SetSelectedWeapon(RIFLE_WEAPON);
 			
@@ -504,7 +505,7 @@ namespace spades {
 		
 		void Client::ShowAlert(const std::string &contents,
 							   AlertType type) {
-			float timeout;
+			float timeout = 0.0f;
 			switch(type) {
 				case AlertType::Notice:
 					timeout = 2.5f;

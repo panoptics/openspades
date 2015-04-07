@@ -110,7 +110,7 @@ namespace spades {
 		SPADES_MARK_FUNCTION_DEBUG();
 		
 		// this is not safe
-		ftruncate(fileno(handle), len);
+		if ( ftruncate( fileno(handle), len) ){} // changed to hide unused return result warn
 	}
 	
 	void StdStream::Flush() {

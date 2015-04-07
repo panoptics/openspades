@@ -631,7 +631,7 @@ namespace spades {
 			
 			int meshSize = 16;
 			if((int)r_water >= 2)
-				meshSize = 128;
+				meshSize = this->map->GetCullDistance();
 			float meshSizeInv = 1.f / (float)meshSize;
 			for(int y = -meshSize; y <= meshSize; y++) {
 				for(int x = -meshSize; x <= meshSize; x++){
@@ -716,8 +716,8 @@ namespace spades {
 			skyCol *= skyCol; // linearize
 			
 			const client::SceneDefinition& def = renderer->GetSceneDef();
-			float waterLevel = 63.f;
-			float waterRange = 128.f;
+			float waterLevel = this->map->WaterDepth()+0.3;
+			float waterRange = this->map->GetCullDistance();
 			
 			Matrix4 mat = Matrix4::Translate(def.viewOrigin.x,
 											 def.viewOrigin.y,
@@ -728,7 +728,8 @@ namespace spades {
 			GLProfiler profiler2(device, "Draw Plane");
 			
 			// do color
-			device->DepthFunc(IGLDevice::Less);
+			device->DepthFunc(IGLDevice::Less );
+			device->DepthMask(false);
 			device->ColorMask(true, true, true, true);
 			{
 				GLProgram *prg = program;
@@ -747,7 +748,9 @@ namespace spades {
 				static GLProgramUniform displaceScale("displaceScale");
 				static GLProgramUniform fovTan("fovTan");
 				static GLProgramUniform waterPlane("waterPlane");
-				
+				static GLProgramUniform waterDepth("waterDepth");
+				static GLProgramUniform mapDimensions("mapDimensions");
+
 				projectionViewModelMatrix(prg);
 				projectionViewMatrix(prg);
 				modelMatrix(prg);
@@ -761,7 +764,9 @@ namespace spades {
 				displaceScale(prg);
 				fovTan(prg);
 				waterPlane(prg);
-				
+				waterDepth(prg);
+				mapDimensions(prg);
+
 				projectionViewModelMatrix.SetValue(renderer->GetProjectionViewMatrix() * mat);
 				projectionViewMatrix.SetValue(renderer->GetProjectionViewMatrix());
 				modelMatrix.SetValue(mat);
@@ -770,7 +775,7 @@ namespace spades {
 				fogDistance.SetValue(fogDist);
 				fogColor.SetValue(fogCol.x, fogCol.y, fogCol.z);
 				skyColor.SetValue(skyCol.x, skyCol.y, skyCol.z);
-				zNearFar.SetValue(def.zNear, def.zFar);
+				zNearFar.SetValue(def.zNear, def.zFar+100.0);
 				viewOrigin.SetValue(def.viewOrigin.x,
 									def.viewOrigin.y,
 									def.viewOrigin.z);
@@ -786,7 +791,9 @@ namespace spades {
 				Vector3 dir = wmat.GetAxis(2);
 				waterPlane.SetValue(dir.x, dir.y, dir.z,
 									-Vector3::Dot(dir, wmat.GetOrigin()));
-				
+				waterDepth.SetValue( 64.0f-12.0f );
+				mapDimensions.SetValue( float(w), float(h), float(d) );
+
 				static GLProgramUniform screenTexture("screenTexture");
 				static GLProgramUniform depthTexture("depthTexture");
 				static GLProgramUniform textureUnif("texture");
@@ -898,8 +905,9 @@ namespace spades {
 				device->TexParamater(IGLDevice::Texture2D,
 									 IGLDevice::TextureMinFilter,
 									 IGLDevice::Linear);
+
 			}
-			
+			device->DepthMask(true);
 		}
 		
 		static uint32_t LinearlizeColor(uint32_t v){
@@ -973,7 +981,7 @@ namespace spades {
 					bool modified = false;
 					int x = 0, y = 0;
 					for(int i = w * h; i > 0; i--){
-						uint32_t col = map->GetColor(x, y, 63);
+						uint32_t col = map->GetColor(x, y, this->map->Depth()-1);
 						
 						x++;
 						if(x == w){
@@ -1014,7 +1022,7 @@ namespace spades {
 						uint32_t *pixels = bitmap.data() + x + y * w;
 						bool modified = false;
 						for(int j = 0; j < 32; j++){
-							uint32_t col = map->GetColor(x+j, y, 63);
+							uint32_t col = map->GetColor(x+j, y, this->map->Depth()-1);
 							
 							col = LinearlizeColor(col);
 							
@@ -1051,8 +1059,12 @@ namespace spades {
 											 client::GameMap *map) {
 			if(map != this->map)
 				return;
-			if(z < 63)
+			if(z < this->map->Depth()-1)
 				return;
+			this->w = this->map->Width();
+			this->h = this->map->Height();
+			this->d = this->map->Depth();
+			
 			MarkUpdate(x, y);
 		}
 	}

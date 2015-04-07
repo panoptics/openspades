@@ -83,8 +83,8 @@ namespace spades {
 		int GetRefCount() {
 			return refCount & 0x7fffffff;
 		}
-		void EnumReferences(asIScriptEngine *eng) {}
-		void ReleaseAllReferences(asIScriptEngine *eng){}
+		void EnumReferences(asIScriptEngine *) {}
+		void ReleaseAllReferences(asIScriptEngine *){}
 		
 		T& At(asUINT index) {
 			if(index >= inner.size()){

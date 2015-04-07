@@ -40,7 +40,7 @@ namespace spades {
 			rnd ^= 0x7abd4513;
 			for(int x = 0; x < DefaultWidth; x++)
 				for(int y = 0; y < DefaultHeight; y++){
-					solidMap[x][y] = 1; // ground only
+					solidMap[ 0 ][x][y] = 1; // ground only
 					for(int z = 0; z < DefaultDepth; z++){
 						uint32_t col = 0x00284067;
 						col ^= 0x070707 & rnd;
@@ -82,7 +82,7 @@ namespace spades {
 				return true;
 			if(!IsSolid(x, y, z - 1))
 				return true;
-			if(z < Depth() - 1 && !IsSolid(x, y, z + 1))
+			if(z < Depth() -1 && !IsSolid(x, y, z + 1))
 				return true;
 			return false;
 		}
@@ -175,14 +175,12 @@ namespace spades {
 		bool GameMap::ClipBox(int x, int y, int z) {
 			int sz;
 			
-			if (x < 0 || x >= 512 || y < 0 || y >= 512)
+			if (x < 0 || x >= DefaultWidth || y < 0 || y >= DefaultHeight)
 				return true;
 			else if (z < 0)
 				return false;
 			sz = (int)z;
-			if(sz == 63)
-				sz=62;
-			else if (sz >= 64)
+			if (sz >= DefaultDepth )
 				return true;
 			return IsSolid((int)x, (int)y, sz);
 		}
@@ -190,14 +188,12 @@ namespace spades {
 		bool GameMap::ClipWorld(int x, int y, int z){
 			int sz;
 			
-			if (x < 0 || x >= 512 || y < 0 || y >= 512)
+			if (x < 0 || x >= DefaultWidth || y < 0 || y >= DefaultHeight)
 				return 0;
 			if (z < 0)
 				return 0;
 			sz = (int)z;
-			if(sz == 63)
-				sz=62;
-			else if (sz >= 63)
+			 if (sz >=  GroundDepth() )
 				return 1;
 			else if (sz < 0)
 				return 0;
@@ -284,7 +280,7 @@ namespace spades {
 			
 #if 1 
 			// faster version
-			uint64_t lastSolidMap = solidMap[a.x&(DefaultWidth-1)]
+			uint64_t lastSolidMap = solidMap[ int(a.z/64) ][a.x&(DefaultWidth-1)]
 			[a.y&(DefaultHeight-1)];
 			if(a.z < 0 && d.z < 0){
 				return false;
@@ -301,7 +297,7 @@ namespace spades {
 					}
 					cnt--;
 				}
-			}else if(a.z >= 64){
+			}else if(a.z >= DefaultDepth ){
 				vOut = a;
 				return true;
 			}
@@ -310,19 +306,19 @@ namespace spades {
 					a.z += d.z; p.x -= i.x; p.y -= i.y;
 					if(a.z < 0 && d.z < 0){
 						return false;
-					}else if (a.z >= 64) {
+					}else if (a.z >= DefaultDepth ) {
 						vOut = a;
 						return true;
 					}
 				}
 				else if ((p.z >= 0) && (a.x != c.x)) {
 					a.x += d.x; p.x += i.z; p.z -= i.y;
-					lastSolidMap = solidMap[a.x&(DefaultWidth-1)]
+					lastSolidMap = solidMap[ int(a.z/64) ][a.x&(DefaultWidth-1)]
 					[a.y&(DefaultHeight-1)];
 				}
 				else {
 					a.y += d.y; p.y += i.z; p.z += i.x;
-					lastSolidMap = solidMap[a.x&(DefaultWidth-1)]
+					lastSolidMap = solidMap[ int(a.z/64) ][a.x&(DefaultWidth-1)]
 					[a.y&(DefaultHeight-1)];
 				}
 				
@@ -370,7 +366,7 @@ namespace spades {
 			dir = dir.Normalize();
 			
 			spades::IntVector3 iv = v0.Floor();
-			spades::Vector3 fv;
+			
 			if(IsSolidWrapped(iv.x, iv.y, iv.z)) {
 				result.hit = true;
 				result.startSolid = true;
@@ -379,30 +375,15 @@ namespace spades {
 				result.normal = IntVector3::Make(0,0,0);
 				return result;
 			}
+			spades::Vector3 fv( 
+				(dir.x > 0.f) ? (float)(iv.x + 1) - v0.x : v0.x - (float)iv.x,
+				(dir.y > 0.f) ? (float)(iv.y + 1) - v0.y : v0.y - (float)iv.y,
+				(dir.z > 0.f) ? (float)(iv.z + 1) - v0.z : v0.z - (float)iv.z
+			);
 			
-			if(dir.x > 0.f){
-				fv.x = (float)(iv.x + 1) - v0.x;
-			}else{
-				fv.x = v0.x - (float)iv.x;
-			}
-			if(dir.y > 0.f){
-				fv.y = (float)(iv.y + 1) - v0.y;
-			}else{
-				fv.y = v0.y - (float)iv.y;
-			}
-			if(dir.z > 0.f){
-				fv.z = (float)(iv.z + 1) - v0.z;
-			}else{
-				fv.z = v0.z - (float)iv.z;
-			}
-			
-			float invX = dir.x;
-			float invY = dir.y;
-			float invZ = dir.z;
-			
-			if(invX != 0.f) invX = 1.f / fabsf(invX);
-			if(invY != 0.f) invY = 1.f / fabsf(invY);
-			if(invZ != 0.f) invZ = 1.f / fabsf(invZ);
+			float invX = ( dir.x != 0.f) ? 1.f / fabsf(dir.x) : dir.x;
+			float invY = ( dir.y != 0.f) ? 1.f / fabsf(dir.y) : dir.y;
+			float invZ = ( dir.z != 0.f) ? 1.f / fabsf(dir.z) : dir.z;
 			
 			for(int i = 0; i < maxSteps; i++){
 				IntVector3 nextBlock;
@@ -415,7 +396,7 @@ namespace spades {
 					else nextBlock.x--;
 					nextBlockTime = fv.x * invX;
 					hasNextBlock = 1;
-				}
+					}
 				if(invY != 0.f){
 					float t = fv.y * invY;
 					if(!hasNextBlock || t < nextBlockTime){
@@ -441,22 +422,10 @@ namespace spades {
 					   hasNextBlock == 2 || // y-plane
 					   hasNextBlock == 3);  // z-plane
 				
-				if(hasNextBlock == 1){
-					fv.x = 1.f;
-				}else{
-					fv.x -= fabsf(dir.x) * nextBlockTime;
-				}
-				if(hasNextBlock == 2){
-					fv.y = 1.f;
-				}else{
-					fv.y -= fabsf(dir.y) * nextBlockTime;
-				}
-				if(hasNextBlock == 3){
-					fv.z = 1.f;
-				}else{
-					fv.z -= fabsf(dir.z) * nextBlockTime;
-				}
-				
+				fv.x = (hasNextBlock == 1) ? 1.f : fv.x - fabsf(dir.x) * nextBlockTime;
+				fv.y = (hasNextBlock == 2) ? 1.f : fv.y - fabsf(dir.y) * nextBlockTime;
+				fv.z = (hasNextBlock == 3) ? 1.f : fv.z - fabsf(dir.z) * nextBlockTime;
+
 				result.hitBlock = nextBlock;
 				result.normal = iv - nextBlock;
 				
@@ -512,27 +481,31 @@ namespace spades {
 			size_t pos = 0;
 			
 			GameMap *map = new GameMap();
+			SPLog("map loaded : len:%d :%d", len, uint32_t(map->Depth()/64));
 			try{
-				for(int y = 0; y < 512; y++){
-					for(int x = 0; x < 512; x++){
-						map->solidMap[x][y] = 0xffffffffffffffffULL;
-						
+				for(uint32_t y = 0; y < DefaultHeight; y++){
+					for(uint32_t x = 0; x < DefaultWidth; x++){
+
+						for (uint32_t sm_i =0; sm_i < uint32_t(map->Depth()/64); sm_i++ ){
+							map->solidMap[sm_i][x][y] = 0xffffffffffffffffULL;
+						}
+
 						if(pos + 2 >= len){
 							SPRaise("File truncated");
 						}
 						
-						int z = 0;
+						uint32_t z = 0;
 						for(;;){
-							int i;
+							uint32_t i;
 							uint32_t *color;
-							int number_4byte_chunks = bytes[pos];
-							int top_color_start = bytes[pos + 1];
-							int top_color_end = bytes[pos + 2];
-							int bottom_color_start;
-							int bottom_color_end;
-							int len_top;
-							int len_bottom;
-							
+							unsigned char number_4byte_chunks = bytes[pos];
+							unsigned char top_color_start = bytes[pos + 1];
+							unsigned char top_color_end = bytes[pos + 2];
+							unsigned char bottom_color_start;
+							unsigned char bottom_color_end;
+							unsigned char len_top;
+							unsigned char len_bottom;
+							if (0==x && 0==y) SPLog("map z : %d  - %d",top_color_start,top_color_end );
 							for(i = z; i < top_color_start; i++)
 								map->Set(x, y, i, false, 0, true);
 							
@@ -544,8 +517,8 @@ namespace spades {
 							for(z = top_color_start; z <= top_color_end; z++)
 								map->Set(x, y, z, true, swapColor(*(color++)), true);
 							
-							if(top_color_end == 62) {
-								map->Set(x, y, 63, true, map->GetColor(x, y, 62), true);
+							if(top_color_end == uint32_t( map->GroundDepth()) ){
+								map->Set(x, y, map->Depth() -1 , true, map->GetColor(x, y, map->GroundDepth() ), true);
 							}
 							
 							len_bottom = top_color_end - top_color_start + 1;
@@ -570,8 +543,8 @@ namespace spades {
 								uint32_t col = swapColor(*(color++));
 								map->Set(x, y, z, true, col, true);
 							}
-							if(bottom_color_end == 63) {
-								map->Set(x, y, 63, true, map->GetColor(x, y, 62), true);
+							if(bottom_color_end == uint32_t( map->Depth() -1 ) ) {
+								map->Set(x, y, map->Depth() -1 , true, map->GetColor(x, y, map->GroundDepth() ), true);
 							}
 						}
 						

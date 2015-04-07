@@ -91,7 +91,7 @@ namespace spades {
 			
 			virtual void SetFogDistance(float) = 0;
 			virtual void SetFogColor(Vector3) = 0;
-			
+
 			/** Starts rendering a scene and waits for additional objects. */
 			virtual void StartScene(const SceneDefinition&) = 0;
 			

@@ -632,9 +632,8 @@ namespace spades {
 				float sp = 1.f - aimDownState;
 				float vl = sinf(world->GetTime() * 1.f);
 				
-				viewWeaponOffset.x += vl * 0.001f * sp;
-				viewWeaponOffset.y += vl * 0.0007f * sp;
-				viewWeaponOffset.z += vl * 0.003f * sp;
+				viewWeaponOffset += MakeVector3(vl,vl,vl) * MakeVector3(0.001f, 0.0007f, 0.003f) * MakeVector3(sp,sp,sp);
+
 			}
 			
 			asIScriptObject *skin;
@@ -930,7 +929,7 @@ namespace spades {
 				int tId = p->GetTeamId();
 				if(tId < 3){
 					CTFGameMode::Team& team = ctfMode->GetTeam(p->GetTeamId());
-					if(team.hasIntel && team.carrier == p->GetId()){
+					if(team.hasIntel && team.carrier == size_t(p->GetId())){
 						
 						IntVector3 col2 = world->GetTeam(1-p->GetTeamId()).color;
 						param.customColor = MakeVector3(col2.x/255.f, col2.y/255.f, col2.z/255.f);

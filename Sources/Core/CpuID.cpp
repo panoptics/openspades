@@ -25,12 +25,12 @@ namespace spades {
 	}
 	
 	CpuID::CpuID() {
-		uint32_t maxStdLevel;
+		
 		{
 			auto ar = cpuid(0);
 			char buf[13];
 			buf[12] = 0;
-			maxStdLevel = ar[0];
+			//uint32_t maxStdLevel = ar[0]; // unused
 			memcpy(buf, ar.data()+1, 12);
 			vendor = buf;
 		}
@@ -91,6 +91,8 @@ namespace spades {
 				return subfeature & (1U << 16);
 			case CpuFeature::SimultaneousMT:
 				return featureEdx & (1U << 28);
+			default:
+				return 0;
 		}
 	}
 	

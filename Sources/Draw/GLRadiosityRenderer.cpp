@@ -475,6 +475,8 @@ namespace spades {
 			int eyeY = (int)(eyePos.y) >> ChunkSizeBits;
 			int eyeZ = (int)(eyePos.z) >> ChunkSizeBits;
 			
+			//SPLog( "chunk size: %d", chunks.size() );
+
 			for(size_t i = 0; i < chunks.size(); i++){
 				Chunk& c = chunks[i];
 				int dx = (c.cx - eyeX) & (chunkW - 1);

@@ -234,7 +234,7 @@ namespace spades {
 			int cols;
 			std::vector<ScoreboardEntry> entries;
 			
-			for(int i = 0; i < world->GetNumPlayerSlots(); i++){
+			for(size_t i = 0; i < world->GetNumPlayerSlots(); i++){
 				Player *p = world->GetPlayer(i);
 				if(!p) continue;
 				if(p->GetTeamId() != team)

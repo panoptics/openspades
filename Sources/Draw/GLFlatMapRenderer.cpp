@@ -37,7 +37,7 @@ namespace spades {
 			for(int i = 0; i < chunkRows * chunkCols; i++)
 				chunkInvalid.push_back(false);
 			
-			Handle<Bitmap> bmp(GenerateBitmap(0, 0, m->Width(), m->Height()), false);
+			Handle<Bitmap> bmp(GenerateBitmap(0, 0, m->Width(), m->Height(), m->Depth() ), false);
 			try{
 				image = static_cast<GLImage *>(renderer->CreateImage(bmp));
 			}catch(...){
@@ -59,7 +59,7 @@ namespace spades {
 			image->Release();
 		}
 		
-		Bitmap *GLFlatMapRenderer::GenerateBitmap(int mx, int my, int w, int h){
+		Bitmap *GLFlatMapRenderer::GenerateBitmap(int mx, int my, int w, int h, int d){
 			SPADES_MARK_FUNCTION();
 			Handle<Bitmap> bmp(new Bitmap(w, h), false);
 			try{
@@ -68,7 +68,7 @@ namespace spades {
 				for(int y = 0; y < h; y++){
 					for(int x = 0; x < w; x++){
 						int px = mx + x, py = my + y;
-						for(int z = 0 ; z < 64; z++){
+						for(int z = 0 ; z < d; z++){
 							if(map->IsSolid(px, py, z)){
 								uint32_t col = map->GetColor(px, py, z);
 								col |= 0xff000000UL;
@@ -87,7 +87,7 @@ namespace spades {
 		
 		void GLFlatMapRenderer::GameMapChanged(int x, int y, int z,
 											   client::GameMap *map){
-			if(map != this->map)
+			if(map != this->map || z < map->Depth() )
 				return;
 			
 			SPAssert(x >= 0); SPAssert(x < map->Width());
@@ -114,7 +114,7 @@ namespace spades {
 				
 				Handle<Bitmap> bmp(GenerateBitmap(chunkX * ChunkSize,
 											 chunkY * ChunkSize,
-											 ChunkSize, ChunkSize), false);
+											 ChunkSize, ChunkSize, map->Depth()-1 ), false);
 				try{
 					image->SubImage(bmp, chunkX * ChunkSize, chunkY * ChunkSize);
 				}catch(...){

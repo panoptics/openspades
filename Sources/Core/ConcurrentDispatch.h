@@ -58,7 +58,7 @@ namespace spades {
 		
 		// disable
 		ConcurrentDispatch(const ConcurrentDispatch&){}
-		void operator =(const ConcurrentDispatch& disp){}
+		void operator =(const ConcurrentDispatch&){}
 	public:
 		ConcurrentDispatch();
 		ConcurrentDispatch(std::string name);

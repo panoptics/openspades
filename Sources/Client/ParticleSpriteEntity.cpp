@@ -103,6 +103,8 @@ namespace spades {
 			velocity.z += 32.f * dt * gravityScale;
 			
 			// TODO: control clip action
+			// TODO: Delete entities that hit water
+			
 			if(blockHitAction != Ignore && map){
 				if(map->ClipWorld(position.x, position.y, position.z)){
 					if(blockHitAction == Delete){

@@ -222,6 +222,7 @@ namespace spades {
 			World *GetWorld() { return world; }
 			
 			bool GetWade();
+			bool GetSubmerged();
 			bool IsOnGroundOrWade();
 			
 			void Update(float dt);

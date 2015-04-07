@@ -42,7 +42,7 @@ SPADES_SETTING(cg_debugHitTest, "0");
 namespace spades {
 	namespace client {
 		
-		World::World(){
+		World::World() : cullDistance(512.0f){
 			SPADES_MARK_FUNCTION();
 			
 			listener = NULL;
@@ -298,7 +298,8 @@ namespace spades {
             bool allowToDestroyLand = pos.size() == 1;
 			for(size_t i = 0; i < pos.size(); i++){
 				const IntVector3& p = pos[i];
-				if(p.z >= (allowToDestroyLand ? 63 : 62) || p.z < 0 || p.x < 0 || p.y < 0 ||
+				//if(p.z >= (allowToDestroyLand ? map->WaterDepth() : map->GroundDepth() ) || p.z < 0 || p.x < 0 || p.y < 0 ||
+				if(p.z >= (allowToDestroyLand ? map->Depth()-1 : map->GroundDepth() ) || p.z < 0 || p.x < 0 || p.y < 0 ||
 				   p.x >= map->Width() || p.y >= map->Height())
 					continue;
 				
@@ -391,14 +392,14 @@ namespace spades {
 					if (dx < dy)
 					{
 						c.x += ixi;
-						if ((unsigned long)c.x >= VSID)
+						if ((unsigned long)c.x >= (unsigned long)VSID)
 							break;
 						dx += dxi;
 					}
 					else
 					{
 						c.y += iyi;
-						if ((unsigned long)c.y >= VSID)
+						if ((unsigned long)c.y >= (unsigned long)VSID)
 							break;
 						dy += dyi;
 					}

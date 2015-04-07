@@ -99,6 +99,7 @@ namespace spades {
 			IGLDevice::UInteger lastColorBufferTexture;
 			
 			float fogDistance;
+			
 			Vector3 fogColor;
 			
 			// used for color correction
@@ -114,7 +115,7 @@ namespace spades {
 			
 			unsigned int lastTime;
 			
-			bool duringSceneRendering;
+			bool duringSceneRendering = false;
 			
 			void BuildProjectionMatrix();
 			void BuildView();
@@ -133,7 +134,7 @@ namespace spades {
 			
 		public:
 			GLRenderer(IGLDevice *glDevice);
-			
+			int w, h, d;
 			virtual void Init();
 			virtual void Shutdown();
 			
@@ -150,9 +151,10 @@ namespace spades {
 			virtual void SetGameMap(client::GameMap *);
 			virtual void SetFogColor(Vector3 v);
 			virtual void SetFogDistance(float f){fogDistance = f;}
-			
+
 			Vector3 GetFogColor() { return fogColor; }
 			float GetFogDistance() { return fogDistance; }
+
 			Vector3 GetFogColorForSolidPass();
 			
 			virtual void StartScene(const client::SceneDefinition&);

@@ -230,7 +230,7 @@ namespace spades {
 			// compute frustrum's z boundary
 			Segment seg;
 			Plane3 plane1(0,0,1,-4.f);
-			Plane3 plane2(0,0,1,64.f);
+			Plane3 plane2(0,0,1, GetRenderer()->d );
 			seg += ZRange(side * minX + up * minY,
 						  lightDir, plane1, plane2);
 			seg += ZRange(side * minX + up * maxY,
@@ -758,7 +758,7 @@ namespace spades {
 			GLModel *lastModel;
 			
 			ModelRenderer() {
-				params.resize(64);
+				params.resize(64*4);
 				lastModel = NULL;
 			}
 			
@@ -881,8 +881,8 @@ namespace spades {
 			return true;
 		}
 		
-		bool GLSparseShadowMapRenderer::SphereCull(const spades::Vector3 &center,
-												  float rad){
+		bool GLSparseShadowMapRenderer::SphereCull(const spades::Vector3 &c,
+												  float){
 			return true; // for models, this is already done
 			/*
 			Vector4 vw = matrix * center;

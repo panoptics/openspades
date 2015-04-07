@@ -420,12 +420,12 @@ namespace spades {
 				if(blockCursorDragging) {
 					// check the starting point is not floating
 					auto start = blockCursorDragPos;
-					if(map->IsSolidWrapped(start.x-1, start.y, start.z) ||
-					   map->IsSolidWrapped(start.x, start.y-1, start.z) ||
-					   map->IsSolidWrapped(start.x, start.y, start.z-1) ||
-					   map->IsSolidWrapped(start.x+1, start.y, start.z) ||
-					   map->IsSolidWrapped(start.x, start.y+1, start.z) ||
-					   map->IsSolidWrapped(start.x, start.y, start.z+1)) {
+					if(map->IsSolidWrapped(start.x-1, start.y,   start.z)   ||
+					   map->IsSolidWrapped(start.x,   start.y-1, start.z)   ||
+					   map->IsSolidWrapped(start.x,   start.y,   start.z-1) ||
+					   map->IsSolidWrapped(start.x+1, start.y,   start.z)   ||
+					   map->IsSolidWrapped(start.x,   start.y+1, start.z)   ||
+					   map->IsSolidWrapped(start.x,   start.y,   start.z+1)) {
 						// still okay
 					}else{
 						// cannot build; floating
@@ -439,7 +439,7 @@ namespace spades {
 				}
 				
 				if(result.hit &&
-				   (result.hitBlock + result.normal).z < 62 &&
+				   (result.hitBlock + result.normal).z < map->GroundDepth() &&
 				   (!OverlapsWithOneBlock(result.hitBlock + result.normal)) &&
 				   BoxDistanceToBlock(result.hitBlock + result.normal) < 3.f &&
 				   !pendingPlaceBlock){
@@ -479,7 +479,7 @@ namespace spades {
 					// Delayed Block Placement can be activated only when the only reason making placement
 					// impossible is that block to be placed overlaps with the player's hitbox.
 					canPending = result.hit &&
-								 (result.hitBlock + result.normal).z < 62 &&
+								 (result.hitBlock + result.normal).z < map->GroundDepth() &&
 								 BoxDistanceToBlock(result.hitBlock + result.normal) < 3.f;
 					
 					blockCursorActive = false;
@@ -554,7 +554,7 @@ namespace spades {
 			SPADES_MARK_FUNCTION();
 			
 			Vector3 muzzle = GetEye();
-			muzzle += GetFront() * 0.01f;
+			muzzle +=  GetFront() * 0.01f; //Vector3(0.0f, -0.1f,0.1f) +
 			
 			// for hit-test debugging
 			std::map<int, HitTestDebugger::PlayerHit> playerHits;
@@ -592,7 +592,7 @@ namespace spades {
 				float hitPlayerDistance = 0.f;
 				HitBodyPart hitPart = HitBodyPart::None;
 				
-				for(int i = 0; i < world->GetNumPlayerSlots(); i++){
+				for(size_t i = 0; i < world->GetNumPlayerSlots(); i++){
 					Player *other = world->GetPlayer(i);
 					if(other == this || other == NULL)
 						continue;
@@ -660,12 +660,12 @@ namespace spades {
 					if(outBlockCoord.x >= 0 && outBlockCoord.y >= 0 && outBlockCoord.z >= 0 &&
 					   outBlockCoord.x < map->Width() && outBlockCoord.y < map->Height() &&
 					   outBlockCoord.z < map->Depth()){
-						if(outBlockCoord.z == 63) {
+						if(outBlockCoord.z == map->Depth() -1 ) {
 							if(world->GetListener())
 								world->GetListener()->BulletHitBlock(mapResult.hitPos,
 																	 mapResult.hitBlock,
 																	 mapResult.normal);
-						}else if(outBlockCoord.z == 62) {
+						}else if(outBlockCoord.z >= map->GroundDepth() ) {
 							// blocks at this level cannot be damaged
 							if(world->GetListener())
 								world->GetListener()->BulletHitBlock(mapResult.hitPos,
@@ -764,9 +764,12 @@ namespace spades {
 					}
 				}
 				
-				if(world->GetListener() && this != world->GetLocalPlayer())
+				if(world->GetListener() )//&& this != world->GetLocalPlayer())
 					world->GetListener()->AddBulletTracer(this,
-														  muzzle, finalHitPos);
+														  muzzle + 
+														  GetFront() * 1.6f
+														  + GetRight() * 0.31f + GetUp() * -0.2f , 
+														  finalHitPos);
 				
 				// one pellet done
 			}
@@ -778,6 +781,7 @@ namespace spades {
 			}
 			
 			// in AoS 0.75's way
+			//Vector3 oo = orientation;
 			Vector3 o = orientation;
 			Vector3 rec = weapon->GetRecoil();
 			float upLimit = Vector3::Dot(GetFront2D(), o);
@@ -786,7 +790,7 @@ namespace spades {
 			o += GetRight() * rec.x * sinf(world->GetTime() * 2.f);
 			o = o.Normalize();
 			SetOrientation(o);
-			
+			//SetOrientation(oo);
 			reloadingServerSide = false;
 		}
 		
@@ -844,7 +848,7 @@ namespace spades {
 			   outBlockCoord.x >= 0 && outBlockCoord.y >= 0 && outBlockCoord.z >= 0 &&
 			   outBlockCoord.x < map->Width() && outBlockCoord.y < map->Height() &&
 			   outBlockCoord.z < map->Depth()){
-				if(outBlockCoord.z < 62){
+				if(outBlockCoord.z < map->GroundDepth() ){
 					SPAssert(map->IsSolid(outBlockCoord.x, outBlockCoord.y, outBlockCoord.z));
 					
 					// send destroy command only for local cmd
@@ -888,7 +892,7 @@ namespace spades {
 			Player *hitPlayer = NULL;
 			int hitFlag = 0;
 			
-			for(int i = 0; i < world->GetNumPlayerSlots(); i++){
+			for(size_t i = 0; i < world->GetNumPlayerSlots(); i++){
 				Player *other = world->GetPlayer(i);
 				if(other == this || other == NULL)
 					continue;
@@ -929,7 +933,7 @@ namespace spades {
 			   outBlockCoord.x < map->Width() &&
 			   outBlockCoord.y < map->Height() &&
 			   outBlockCoord.z < map->Depth()){
-				if(outBlockCoord.z < 62){
+				if(outBlockCoord.z < map->GroundDepth() ){
 					int x = outBlockCoord.x;
 					int y = outBlockCoord.y;
 					int z = outBlockCoord.z;
@@ -1009,9 +1013,18 @@ namespace spades {
 		
 		bool Player::GetWade() {
 			SPADES_MARK_FUNCTION_DEBUG();
-			return GetOrigin().z > 62.f;
+			auto *map = GetWorld()->GetMap();
+
+			return GetOrigin().z >= float( map->WaterDepth()-0.9 );
 		}
-		
+
+		bool Player::GetSubmerged() {
+			SPADES_MARK_FUNCTION_DEBUG();
+			auto *map = GetWorld()->GetMap();
+
+			return GetOrigin().z >= float( map->WaterDepth() + 0.5 ) ;
+		}
+
 		Vector3 Player::GetOrigin() {
 			SPADES_MARK_FUNCTION_DEBUG();
 			Vector3 v = eye;
@@ -1119,7 +1132,7 @@ namespace spades {
 			   map->ClipBox(position.x + .45f, position.y - .45f, nz + m) ||
 			   map->ClipBox(position.x + .45f, position.y + .45f, nz + m)) {
 				if(velocity.z >= 0.f){
-					wade = position.z > 61.f;
+					wade = position.z >= float( map->WaterDepth() ); // 61.0f
 					airborne = false;
 				}
 				velocity.z = 0.f;
@@ -1144,10 +1157,14 @@ namespace spades {
 		}
 		
 		void Player::MovePlayer(float fsynctics) {
+			bool underwater = position.z >= float( world->GetMap()->WaterDepth()+0.1 );
+
 			if(input.jump && (!lastJump) &&
-			   IsOnGroundOrWade()) {
+			   ( IsOnGroundOrWade() )  ) {
+
 				velocity.z = -0.36f;
 				lastJump = true;
+
 				if(world->GetListener() && world->GetTime() > lastJumpTime + .1f){
 					world->GetListener()->PlayerJumped(this);
 					lastJumpTime = world->GetTime();
@@ -1157,10 +1174,13 @@ namespace spades {
 			}
 			
 			float f = fsynctics;
-			if(airborne)
-				f *= 0.1f;
+
+			if (underwater)
+				f *= .8f;
 			else if(input.crouch)
 				f *= 0.3f;
+			else if(airborne)
+				f *= 0.1f;
 			else if((weapInput.secondary && IsToolWeapon()) ||
 					input.sneak)
 				f *= 0.5f;
@@ -1198,8 +1218,16 @@ namespace spades {
 			// this is a linear approximation that's
 			// done in pysnip
 			// accurate computation is not difficult
+
 			f = fsynctics + 1.f;
-			velocity.z += fsynctics;
+			if (underwater)
+				if (!input.crouch)
+					velocity.z -= fsynctics/8.0;
+				else
+					velocity.z += fsynctics/8.0;
+			else
+				velocity.z += fsynctics;
+
 			velocity.z /= f; // air friction
 			
 			if(wade)
@@ -1484,6 +1512,8 @@ namespace spades {
 					return true;
 				case ToolWeapon:
 					return weapon->IsReadyToShoot();
+				default :
+					return 0;
 			}
 		}
 		
@@ -1502,6 +1532,7 @@ namespace spades {
 				default:
 					SPAssert(false);
 			}
+			return 0;
 		}
 		
 		bool Player::OverlapsWith(const spades::AABB3 &aabb) {

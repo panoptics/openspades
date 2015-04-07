@@ -49,7 +49,9 @@ namespace spades {
 			GLProgramUniform pagetableSizeInv;
 			GLProgramUniform minLod;
 			GLProgramUniform shadowMapSizeInv;
+			GLProgramUniform mapDimensions;
 		public:
+
 			GLShadowShader();
 			~GLShadowShader(){}
 			

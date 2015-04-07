@@ -120,7 +120,7 @@ namespace spades {
 		map(m),
 		frameBuf(nullptr),
 		depthBuf(nullptr),
-		rleHeap(m->Width() * m->Height() * 64),
+		rleHeap(m->Width() * m->Height() * m->Depth()),
 		level(level),
 		w(m->Width()), h(m->Height()),
 		renderer(r){
@@ -179,7 +179,7 @@ namespace spades {
 			 map->GetSolidMapWrapped(x, y-1)};
 			bool old = false;
 			
-			for(int z = 0; z < 64; z++) {
+			for(int z = 0; z < map->Depth(); z++) {
 				bool b = (smap >> z) & 1;
 				if(b && !old) {
 					out.push_back(static_cast<RleData>(z));
@@ -191,7 +191,7 @@ namespace spades {
 			setHeader(0, out.size());
 			
 			old = true;
-			for(int z = 63; z >= 0; z--) {
+			for(int z = map->Depth()-1; z >= 0; z--) {
 				bool b = (smap >> z) & 1;
 				if(b && !old) {
 					out.push_back(static_cast<RleData>(z));
@@ -202,7 +202,7 @@ namespace spades {
 			
 			for(int k = 0; k < 4; k++) {
 				setHeader(k + 1, out.size());
-				for(int z = 0; z < 64; z++) {
+				for(int z = 0; z < map->Depth(); z++) {
 					if((smap >> z) & 1){
 						if(!((adjs[k] >> z) & 1)){
 							out.push_back(static_cast<RleData>(z));
@@ -240,10 +240,10 @@ namespace spades {
 			
 			// hard code for further optimization
 			enum {
-				w = 512, h = 512
+				w = 1024, h = 1024
 			};
-			SPAssert(map->Width() == 512);
-			SPAssert(map->Height() == 512);
+			//SPAssert(map->Width() == 2048);
+			//SPAssert(map->Height() == 2048);
 			
 			const auto *rle = this->rle.data();
 			auto& rleHeap = this->rleHeap;
@@ -431,7 +431,7 @@ namespace spades {
 			
 			RleData *lastRle;
 			{
-				auto ref = rle[(irx & w-1) + ((iry & h-1) * w)];
+				auto ref = rle[(irx & (w-1)) + ((iry & (h-1)) * w)];
 				lastRle = rleHeap.Dereference<RleData>(ref);
 			}
 			
@@ -549,37 +549,46 @@ namespace spades {
 											Face face, float dist) {
 					LinePixel px;
 					px.depth = dist;
+
 #if ENABLE_SSE
-					if(flevel == SWFeatureLevel::SSE2) {
+					//if(flevel == SWFeatureLevel::SSE2) {
+
 						__m128i m;
-						uint32_t col = map->GetColorWrapped(x, y, z);
+						uint32_t col =  map->GetColorWrapped(x, y, z);
+
 						m = _mm_setr_epi32(col, 0,0,0);
+
 						m = _mm_unpacklo_epi8(m, _mm_setzero_si128());
 						m = _mm_shufflelo_epi16(m, 0xc6);
 						
 						switch(face){
-							case Face::PosZ:
-								m = _mm_srli_epi16(m, 1);
-								break;
-							case Face::PosX:
-							case Face::PosY:
-							case Face::NegX:
+
+							default:
+							//case Face::PosX:
+							//case Face::PosY:
+							//case Face::NegX:
 								m = _mm_adds_epi16
 								(_mm_srli_epi16(m, 1), _mm_srli_epi16(m, 2));
 								break;
-							default:
+							case Face::PosZ:
+								m = _mm_srli_epi16(m, 1);
 								break;
+							
+								//break;
 						}
 						if((col>>24)<100) {
 							m = _mm_srli_epi16(m, 1);
 						}
+
 						m = _mm_packus_epi16(m, m);
 						_mm_store_ss(reinterpret_cast<float *>(&px.combined),
 										 _mm_castsi128_ps(m));
+
 						px.filled = true;
-					}else
+					//}else
 #endif
 						// non-optimized
+/*
 					{
 						uint32_t col;
 						col = map->GetColorWrapped(x, y, z);
@@ -598,7 +607,7 @@ namespace spades {
 						}
 						px.combined = col;
 						px.filled = true;
-					}
+					}*/
 					return px;
 				};
 				
@@ -651,8 +660,8 @@ namespace spades {
 				// add walls
 				{
 					// by RLE map
-					auto ref = rle[static_cast<std::uint_fast32_t>(irx & w-1) +
-								   static_cast<std::uint_fast32_t>(iry & h-1) * w];
+					auto ref = rle[static_cast<std::uint_fast32_t>((irx & (w-1))) +
+								   static_cast<std::uint_fast32_t>((iry & (h-1))) * w];
 					RleData *rle = rleHeap.Dereference<RleData>(ref);
 					lastRle = rle;
 					auto *ptr = rle;
@@ -686,7 +695,7 @@ namespace spades {
 				// check pitch cull
 				if((--count) == 0){
 					if((transform(invDist, 0) >= lineResolution - 1 && icz >= 0) ||
-					   transform(invDist, 63) <= 0)
+					   transform(invDist, map->Depth()-1 ) <= 0)
 						break;
 					count = 4;
 				}
@@ -695,12 +704,14 @@ namespace spades {
 			}
 		}
 
-		
+		#define tsize  5000
+		#define titems 4096.f
 		struct AtanTable {
-			std::array<uint16_t, 5000> sm;
-			std::array<uint16_t, 5000> lg;
-			std::array<uint16_t, 5000> smN;
-			std::array<uint16_t, 5000> lgN;
+
+			std::array<uint16_t, tsize> sm;
+			std::array<uint16_t, tsize> lg;
+			std::array<uint16_t, tsize> smN;
+			std::array<uint16_t, tsize> lgN;
 			
 			// [0, 2pi] -> [0, 65536]
 			static uint16_t ToFixed(float v) {
@@ -711,60 +722,27 @@ namespace spades {
 			}
 			
 			AtanTable() {
-				for(int i = 0; i < 5000; i++) {
-					sm[i] = ToFixed(atanf(i / 4096.f));
-					lg[i] = ToFixed(atanf(1.f / ((i + .5f) / 4096.f)));
-					smN[i] = ToFixed(-atanf(i / 4096.f));
-					lgN[i] = ToFixed(-atanf(1.f / ((i + .5f) / 4096.f)));
+				for(int i = 0; i < tsize; i++) {
+					sm[i] = ToFixed(atanf(i / titems));
+					lg[i] = ToFixed(atanf(1.f / ((i + .5f) / titems)));
+					smN[i] = ToFixed(-atanf(i / titems));
+					lgN[i] = ToFixed(-atanf(1.f / ((i + .5f) / titems)));
 				}
 			}
 		};
 		static AtanTable atanTable;
 		static inline uint16_t fastATan(float v){
-			if(v < 0.f) {
-				if(v > -1.f) {
-					v *= -4096.f;
-					int idx = static_cast<int>(v);
-					//v -= idx;
-					auto ret = atanTable.smN[idx];
-					return ret;
-				}else{
-					v = fastDiv(-4096.f, v);
-					int idx = static_cast<int>(v);
-					//v -= idx;
-					auto ret = atanTable.lgN[idx];
-					return ret;
-				}
-			}else{
-				if(v < 1.f) {
-					v *= 4096.f;
-					int idx = static_cast<int>(v);
-					//v -= idx;
-					auto ret = atanTable.sm[idx];
-					return ret;
-					//ret += (atanTable.sm[idx + 1] - ret) * v;
-					//return ret;
-				}else{
-					v = fastDiv(4096.f, v);
-					int idx = static_cast<int>(v);
-					//v -= idx;
-					auto ret = atanTable.lg[idx];
-					return ret;
-					//ret += (atanTable.lg[idx + 1] - ret) * v;
-					//return ret;
-				}
-			}
+
+				return (v < 0.f) ? (v > -1.f) ? atanTable.smN[ static_cast<int>( v * -titems ) ] : atanTable.lgN[ static_cast<int>( fastDiv(-titems, v) ) ] :
+(v < 1.f) ? atanTable.sm[ static_cast<int>( v * titems ) ] : atanTable.lg[ static_cast<int>( fastDiv(titems, v) ) ];
+
 		}
 		
 		static inline uint16_t fastATan2(float y, float x) {
-			if(x == 0.f) {
-				return y > 0.f ? 16384 : -16384;
-				//y > 0.f ? (pi * 0.5f) : (-pi * 0.5f);
-			}else if(x > 0.f) {
-				return fastATan(fastDiv(y, x));
-			}else{
-				return fastATan(fastDiv(y, x)) + 32768;
-			}
+			return (x == 0.f) ?
+				 y > 0.f ? 16384 : -16384 :
+				(x > 0.f) ? fastATan(fastDiv(y, x)) : fastATan(fastDiv(y, x)) + 32768;
+
 		}
 		
 		template<SWFeatureLevel flevel, int under>
@@ -833,7 +811,7 @@ namespace spades {
 						goto SlowBlockPath;
 					}
 					
-				FastBlockPath:
+				//FastBlockPath:
 					{
 						
 						// Use bi-linear interpolation for faster yaw/pitch

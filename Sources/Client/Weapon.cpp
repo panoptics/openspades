@@ -203,9 +203,9 @@ namespace spades {
 				}
 			}
 			virtual Vector3 GetRecoil () {
-				return MakeVector3(0.0001f, 0.05f, 0.f);
+				return MakeVector3(0.0001f, 0.005f, 0.f);
 			}
-			virtual float GetSpread() { return 0.006f; }
+			virtual float GetSpread() { return 0.001f; }
 			virtual int GetPelletSize() { return 1; }
 		};
 		
@@ -230,9 +230,9 @@ namespace spades {
 				}
 			}
 			virtual Vector3 GetRecoil () {
-				return MakeVector3(0.00005f, 0.0125f, 0.f);
+				return MakeVector3(0.00005f, 0.00125f, 0.f);
 			}
-			virtual float GetSpread() { return 0.012f; }
+			virtual float GetSpread() { return 0.0012f; }
 			virtual int GetPelletSize() { return 1; }
 		};
 		
