@@ -20,11 +20,11 @@
 
 
 uniform sampler2D mapShadowTexture;
-
 varying vec3 mapShadowCoord;
+const uniform vec3 mapDimensions;
 
 float VisibilityOfSunLight_Map() {
-	const vec2 mapSize = vec2(512.); // TODO: variable?
+	const vec2 mapSize = mapDimensions.xy; // FIXED :: TODO: variable?
 	vec2 mapSizeInv = 1. / mapSize;
 	
 	vec2 shadowMapPixCoord = mapShadowCoord.xy * mapSize;

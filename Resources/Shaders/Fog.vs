@@ -17,10 +17,12 @@
  along with OpenSpades.  If not, see <http://www.gnu.org/licenses/>.
  
  */
+uniform float fogDistance;
 
 vec4 FogDensity(float poweredLength) {
 	float distance = poweredLength;
-	distance = min(distance * (1. / 128. / 128.), 1.);
+	
+	distance = min(distance * (1. / fogDistance / fogDistance), 1.);
 	float weakenedDensity = 1. - distance;
 	weakenedDensity *= weakenedDensity;
 	return mix(vec4(distance), vec4(1. - weakenedDensity),

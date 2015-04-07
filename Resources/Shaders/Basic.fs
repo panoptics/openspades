@@ -19,7 +19,7 @@
  */
 
 varying vec4 color;
-
+uniform float waterDepth;
 void main() {
 	gl_FragColor = color;
 }

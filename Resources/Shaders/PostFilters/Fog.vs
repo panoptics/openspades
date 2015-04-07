@@ -35,7 +35,7 @@ varying vec3 shadowRayDirection;
 
 vec3 transformToShadow(vec3 v) {
 	v.y -= v.z;
-	v *= vec3(1., 1., 1. / 255.);
+	v *= vec3(1., 1., 1. / 512.);
 	return v;
 }
 

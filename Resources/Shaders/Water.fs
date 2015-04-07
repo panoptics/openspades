@@ -36,6 +36,7 @@ uniform vec2 zNearFar;
 uniform vec4 fovTan;
 uniform vec4 waterPlane;
 uniform vec3 viewOrigin;
+uniform vec3 mapDimensions;
 
 uniform vec2 displaceScale;
 
@@ -74,7 +75,7 @@ void main() {
 	wave2.xy *= 0.02344 / 200.;
 	wave.xy += wave2;
 	
-	wave.z = (1. / 128.);
+	wave.z = (1. / 64.);
 	wave.xyz = normalize(wave.xyz);
 	
 	vec2 origScrPos = screenPosition.xy / screenPosition.z;
@@ -102,6 +103,7 @@ void main() {
 			// this fragment of water is not visible
 			//discard; done by early-Z test
 		}
+		
 	}else{
 		depth = planeDistance / dot(waterPlane, vec4(0.,0.,1.,0.));
 		depth = abs(depth);
@@ -119,14 +121,16 @@ void main() {
 	blurDir /= max(length(blurDir), 1.);
 	vec2 blurDirSign = mix(vec2(-1.), vec2(1.), step(0., blurDir));
 	vec2 startPos = (waterCoord - integralCoord) * blurDirSign;
-	vec2 diffPos = blurDir * envelope * blurDirSign * .5 /*limit blur*/;
+	vec2 diffPos = blurDir * envelope * blurDirSign * .005 /*limit blur*/;
 	vec2 subCoord = 1. - clamp((vec2(0.5) - startPos) / diffPos,
 						  0., 1.);
 	vec2 sampCoord = integralCoord + subCoord * blurDirSign;
-	vec3 waterColor = texture2D(texture, sampCoord / 512.).xyz;
-	
+	//vec3 waterColor = texture2D(texture, sampCoord / mapDimensions.x ).xyz;
+	vec3 waterColor = vec3(0.1,0.6,0.3);
 	// underwater object color
 	gl_FragColor = texture2D(screenTexture, scrPos);
+
+
 #if !LINEAR_FRAMEBUFFER
 	gl_FragColor.xyz *= gl_FragColor.xyz; // screen color to linear
 #endif
@@ -191,6 +195,7 @@ void main() {
 	gl_FragColor.xyz = sqrt(gl_FragColor.xyz);
 #endif
 	
-	gl_FragColor.w = 1.;
+	gl_FragColor.w =  clamp((envelope)-0.15, 0., 1.);
+
 }
 

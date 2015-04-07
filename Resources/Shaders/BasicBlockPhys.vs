@@ -18,7 +18,7 @@
  
  */
 
-
+#version 130
 
 uniform mat4 projectionViewMatrix;
 uniform mat4 viewMatrix;
@@ -44,9 +44,14 @@ attribute vec3 fixedPositionAttribute;
 varying vec2 ambientOcclusionCoord;
 varying vec4 color;
 varying vec3 fogDensity;
+varying vec3 fogColorIn;
 
 varying vec3 viewSpaceCoord;
 varying vec3 viewSpaceNormal;
+uniform vec4 waterPlane;
+uniform float waterDepth;
+uniform vec3 fogColor;
+
 
 void PrepareForShadowForMap(vec3 vertexCoord, vec3 fixedVertexCoord, vec3 normal);
 vec4 FogDensity(float poweredLength);
@@ -60,8 +65,10 @@ void main() {
 	gl_Position = projectionViewMatrix * vertexPos;
 	
 	color = colorAttribute;
+
 	color.xyz *= color.xyz; // linearize
-	
+	//if ( vertexPos.z>= waterDepth ) color.xyz-= clamp( vec3( (vertexPos.z-( waterDepth ) ) /32.0 ) , 0.1 , 0.85);
+
 	// lambert reflection
 	vec3 sunDir = normalize(vec3(0, -1., -1.));
 	color.w = dot(sunDir, normalAttribute);
@@ -71,9 +78,21 @@ void main() {
 	ambientOcclusionCoord = (ambientOcclusionCoordAttribute + .5) * (1. / 256.);
 
 	vec4 viewPos = viewMatrix * vertexPos;
-	float distance = dot(viewPos.xyz, viewPos.xyz);
-	fogDensity = FogDensity(distance).xyz;
+	float distance= dot(viewPos.xyz, viewPos.xyz); 
 	
+
+	fogColorIn = fogColor;
+
+
+	fogDensity = FogDensity(distance).xyz;
+
+	if ( vertexPos.z>= waterDepth ) {
+	  (fogDensity += ( vertexPos.z-waterDepth )/16.0);
+
+	   fogColorIn = mix(fogColor, vec3(0.0,0.0,0.05), 0.5+( vertexPos.z-waterDepth ) / 16.0)  ;
+	}
+
+
 	vec3 fixedPosition = chunkPosition;
 	fixedPosition += fixedPositionAttribute * 0.5;
 	fixedPosition += normalAttribute * 0.1;

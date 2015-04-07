@@ -28,10 +28,11 @@
 uniform sampler2D mapShadowTexture;
 
 varying vec3 mapShadowCoord;
+uniform vec3 mapDimensions;
 
 vec3 MapSoft_BlockSample(vec2 sample, float depth,
 						 float shiftedDepth) {
-	const float factor = 1. / 512.;
+	const float factor = 1. / mapDimensions.x;
 	float val = texture2D(mapShadowTexture, sample.xy * factor).w;
 	float distance = shiftedDepth - val;
 	float weight = step(0., distance);
@@ -88,7 +89,7 @@ float VisibilityOfSunLight_Map() {
 	float val = 1. - mix(val1, val2, blurWeight.y);
 	
 	// --- sharp shadow
-	vec4 sharpCol = texture2D(mapShadowTexture, floor(mapShadowCoord.xy) / 512.);
+	vec4 sharpCol = texture2D(mapShadowTexture, floor(mapShadowCoord.xy) / mapDimensions.xy);
 	float sharpVal = sharpCol.w;
 	
 	// side shadow?

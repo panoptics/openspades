@@ -31,6 +31,7 @@ uniform sampler2D coarseShadowMapTexture;
 uniform vec2 zNearFar;
 
 uniform vec3 fogColor;
+const uniform vec3 mapDimensions;
 uniform float fogDistance;
 
 varying vec2 texCoord;
@@ -65,7 +66,7 @@ void main() {
 	screenDistance = min(screenDistance, fogDistance);
 	float screenVoxelDistance = screenDistance * voxelDistanceFactor;
 	
-	const vec2 voxels = vec2(512.);
+	const vec2 voxels = vec2(mapDimensions.xy);
 	const vec2 voxelSize = 1. / voxels;
 	float fogDistanceTime = fogDistance * voxelDistanceFactor;
 	float zMaxTime = min(screenVoxelDistance, fogDistanceTime);
@@ -92,9 +93,9 @@ void main() {
 	float time = 0.;
 	float total = 0.;
 	
-	if(startPos.z > (63. / 255.) && dir.z < 0.) {
+	if(startPos.z > ( (mapDimensions.z-1.0 ) / 255.) && dir.z < 0.) {
 		// fog pass for mirror scene
-		time = ((63. / 255.) - startPos.z) / dir.z;
+		time = (( (mapDimensions.z-1.0 ) / 255.) - startPos.z) / dir.z;
 		total += fogDensFunc(time);
 		startPos += time * dir;
 	}

@@ -68,6 +68,6 @@ vec3 Radiosity_Map(float detailAmbientOcclusion) {
 	
 	amb *= .8 - normalVarying.z * .2;
 	col += amb * ambientColor;
-	
+
 	return col;
 }

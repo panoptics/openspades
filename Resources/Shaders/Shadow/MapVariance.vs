@@ -18,10 +18,8 @@
  
  */
 
-
-
-
 varying vec3 mapShadowCoord;
+uniform vec3 mapDimensions;
 
 void PrepareForShadow_Map(vec3 vertexCoord, vec3 normal) {
 	mapShadowCoord = vertexCoord;
@@ -32,5 +30,5 @@ void PrepareForShadow_Map(vec3 vertexCoord, vec3 normal) {
 	
 	// texture coord is normalized
 	// FIXME: variable texture size
-	mapShadowCoord.xy /= 512.;
+	mapShadowCoord.xy /= mapDimensions.xy;
 }

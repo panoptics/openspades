@@ -22,6 +22,7 @@
 uniform sampler2D mapShadowTexture;
 
 varying vec3 mapShadowCoord;
+uniform float waterDepth;
 
 float VisibilityOfSunLight_Map() {
 	float val = texture2D(mapShadowTexture, mapShadowCoord.xy).w;

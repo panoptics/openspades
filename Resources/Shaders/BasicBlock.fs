@@ -28,6 +28,7 @@ varying vec3 fogDensity;
 uniform sampler2D ambientOcclusionTexture;
 uniform sampler2D detailTexture;
 uniform vec3 fogColor;
+uniform float waterDepth;
 
 vec3 EvaluateSunLight();
 vec3 EvaluateAmbientLight(float detailAmbientOcclusion);

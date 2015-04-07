@@ -23,6 +23,7 @@
 varying vec4 color;
 varying vec2 ambientOcclusionCoord;
 varying vec3 fogDensity;
+varying vec3 fogColorIn;
 
 varying vec3 viewSpaceCoord;
 varying vec3 viewSpaceNormal;
@@ -30,7 +31,7 @@ uniform vec3 viewSpaceLight;
 
 uniform sampler2D ambientOcclusionTexture;
 uniform sampler2D detailTexture;
-uniform vec3 fogColor;
+uniform float waterDepth;
 
 vec3 EvaluateSunLight();
 vec3 EvaluateAmbientLight(float detailAmbientOcclusion);
@@ -64,15 +65,15 @@ void main() {
 	}
 	
 	// apply fog
-	gl_FragColor.xyz = mix(gl_FragColor.xyz, fogColor, fogDensity);
+	gl_FragColor.xyz = mix(gl_FragColor.xyz, fogColorIn, fogDensity);
 	
 	gl_FragColor.xyz = max(gl_FragColor.xyz, 0.);
-	
+
 	// gamma correct
 #if !LINEAR_FRAMEBUFFER
 	gl_FragColor.xyz = sqrt(gl_FragColor.xyz);
 #endif
-	
+
 #if USE_HDR
 	// somehow denormal occurs, so detect it here and remove
 	// (denormal destroys screen)

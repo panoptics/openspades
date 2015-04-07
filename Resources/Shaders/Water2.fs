@@ -42,6 +42,7 @@ uniform vec4 waterPlane;
 uniform vec3 viewOrigin;
 
 uniform vec2 displaceScale;
+uniform vec3 mapDimensions;
 
 vec3 EvaluateSunLight();
 vec3 EvaluateAmbientLight(float detailAmbientOcclusion);
@@ -126,10 +127,10 @@ void main() {
 	vec2 diffPos = blurDir * envelope * blurDirSign * .5 /*limit blur*/;
 	vec2 subCoord = 1. - clamp((vec2(0.5) - startPos) / diffPos,
 						  0., 1.);
-	vec2 sampCoord = integralCoord + subCoord * blurDirSign;
-	vec3 waterColor = texture2D(texture, sampCoord / 512.).xyz;
+	vec2 sampCoord = subCoord;//integralCoord + subCoord * blurDirSign;
+	//vec3 waterColor = texture2D(texture, sampCoord / mapDimensions.x).xyz;
+	vec3 waterColor = vec3(0.1,0.6,0.3);
 	waterColor *= EvaluateSunLight() + EvaluateAmbientLight(1.);
-	
 	// underwater object color
 	gl_FragColor = texture2D(screenTexture, scrPos);
 #if !LINEAR_FRAMEBUFFER
@@ -225,6 +226,7 @@ void main() {
 	gl_FragColor.xyz = sqrt(gl_FragColor.xyz);
 #endif
 	
-	gl_FragColor.w = 1.;
+	//gl_FragColor.w = 1.;
+	gl_FragColor.w =  clamp((envelope)-0.15, 0., 1.);
 }
 
